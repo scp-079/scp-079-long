@@ -311,12 +311,12 @@ def share_watch_ban_user(client: Bot, uid: int, until: str) -> bool:
         logger.warning(f"Share watch ban user error: {e}", exc_info=True)
 
 
-def update_score(client: Bot, uid: int) -> bool:
+def update_score(client: Client, uid: int) -> bool:
     # Update a user's score, share it
     try:
-        long_count = len(glovar.user_ids[uid]["long"])
-        long_score = long_count * 0.5
-        glovar.user_ids[uid]["score"]["long"] = long_score
+        count = len(glovar.user_ids[uid]["detected"])
+        score = count * 0.5
+        glovar.user_ids[uid]["score"][glovar.sender.lower()] = score
         save("user_ids")
         share_data(
             client=client,
@@ -325,7 +325,7 @@ def update_score(client: Bot, uid: int) -> bool:
             action_type="score",
             data={
                 "id": uid,
-                "score": long_score
+                "score": score
             }
         )
 
