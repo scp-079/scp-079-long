@@ -85,6 +85,9 @@ def check(update: Update, context: CallbackContext) -> bool:
         client = context.bot
         message = update.effective_message
 
+        if not message.from_user:
+            return True
+
         if is_long_text(message):
             terminate_user(client, message)
 
