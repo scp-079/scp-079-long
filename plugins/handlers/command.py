@@ -77,9 +77,7 @@ def config(update: Update, context: CallbackContext) -> bool:
     # Request CONFIG session
     try:
         client = context.bot
-        message = update.edited_message or update.message
-        if not message:
-            return False
+        message = update.effective_message
 
         gid = message.chat.id
         mid = message.message_id
@@ -130,9 +128,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
     # Config the bot directly
     try:
         client = context.bot
-        message = update.edited_message or update.message
-        if not message:
-            return False
+        message = update.effective_message
 
         gid = message.chat.id
         mid = message.message_id
@@ -205,9 +201,7 @@ def long(update: Update, context: CallbackContext) -> bool:
     # Fore to check long messages
     try:
         client = context.bot
-        message = update.edited_message or update.message
-        if not message:
-            return False
+        message = update.effective_message
 
         gid = message.chat.id
         mid = message.message_id
@@ -233,8 +227,6 @@ def version(update: Update, context: CallbackContext) -> bool:
     try:
         client = context.bot
         message = update.edited_message or update.message
-        if not message:
-            return False
 
         cid = message.chat.id
         aid = message.from_user.id

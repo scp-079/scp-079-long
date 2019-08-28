@@ -83,7 +83,7 @@ def check(update: Update, context: CallbackContext) -> bool:
     # Check the messages sent from groups
     try:
         client = context.bot
-        message = update.edited_message or update.message
+        message = update.effective_message
         if not message:
             return False
 
@@ -348,7 +348,8 @@ def test(update: Update, context: CallbackContext) -> bool:
     # Show test results in TEST group
     try:
         client = context.bot
-        message = update.edited_message or update.message
+        message = update.effective_message
+        print(message)
         if not message:
             return False
 
