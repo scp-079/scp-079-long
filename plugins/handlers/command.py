@@ -27,10 +27,8 @@ from .. import glovar
 from ..functions.channel import get_debug_text, share_data
 from ..functions.etc import bold, code, get_command_context, get_command_type, get_int, get_now, thread, user_mention
 from ..functions.file import save
-from ..functions.filters import is_class_c, is_long_text, test_group
+from ..functions.filters import is_class_c, test_group
 from ..functions.telegram import delete_message, get_group_info, send_message, send_report_message
-from ..functions.tests import long_test
-from ..functions.user import terminate_user
 
 # Enable logging
 logger = logging.getLogger(__name__)
@@ -213,16 +211,15 @@ def long(update: Update, context: CallbackContext) -> bool:
 
         gid = message.chat.id
         mid = message.message_id
-        import json
-        logger.warning(update)
-        if message.reply_to_message:
-            if gid == glovar.test_group_id:
-                long_test(client, message.reply_to_message)
-            else:
-                if is_long_text(message.reply_to_message):
-                    terminate_user(client, message.reply_to_message)
-
         thread(delete_message, (client, gid, mid))
+
+        # Check the edited super long messages
+        r_message = message.reply_to_message
+        if r_message:
+            r_mid = r_message.message_id
+            r_text = r_message.text
+            if r_text == "0":
+                thread(delete_message, (client, gid, r_mid))
 
         return True
     except Exception as e:
