@@ -142,17 +142,18 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
             # Check command format
             command_type, command_context = get_command_context(message)
             if command_type:
+                if command_type == "show":
+                    text += (f"操作：{code('查看设置')}\n"
+                             f"设置：{code((lambda x: '默认' if x else '自定义')(new_config.get('default')))}\n"
+                             f"消息字节上限：{code(new_config['limit'])}\n")
+                    thread(send_report_message, (30, client, gid, text))
+                    thread(delete_message, (client, gid, mid))
+                    return True
+
                 now = get_now()
                 # Check the config lock
                 if now - new_config["lock"] > 310:
-                    if command_type == "show":
-                        text += (f"操作：{code('查看设置')}\n"
-                                 f"设置：{code((lambda x: '默认' if x else '自定义')(new_config.get('default')))}\n"
-                                 f"消息字节上限：{code(new_config['limit'])}\n")
-                        thread(send_report_message, (30, client, gid, text))
-                        thread(delete_message, (client, gid, mid))
-                        return True
-                    elif command_type == "default":
+                    if command_type == "default":
                         if not new_config.get("default"):
                             new_config = deepcopy(glovar.default_config)
                     else:
