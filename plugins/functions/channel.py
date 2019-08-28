@@ -315,7 +315,7 @@ def update_score(client: Bot, uid: int) -> bool:
     # Update a user's score, share it
     try:
         long_count = len(glovar.user_ids[uid]["long"])
-        long_score = long_count * 0.
+        long_score = long_count * 0.5
         glovar.user_ids[uid]["score"]["long"] = long_score
         save("user_ids")
         share_data(
