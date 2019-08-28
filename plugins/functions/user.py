@@ -149,7 +149,7 @@ def terminate_user(client: Bot, message: Message) -> bool:
                     add_detected_user(gid, uid)
                     declare_message(client, gid, mid)
                 else:
-                    result = forward_evidence(client, message, "自动删除", "全局规则")
+                    result = forward_evidence(client, message, "自动删除", "群组自定义")
                     if result:
                         glovar.recorded_ids[gid].add(uid)
                         delete_message(client, gid, mid)
