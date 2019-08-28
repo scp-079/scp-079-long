@@ -8,7 +8,7 @@ See [this article](https://scp-079.org/long/).
 
 ## To Do List
 
-- [ ] Basic functions
+- [x] Basic functions
 
 ## Requirements
 
