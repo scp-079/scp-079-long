@@ -50,7 +50,7 @@ default_config: Dict[str, Union[bool, int]] = {
 }
 
 default_user_status: Dict[str, Union[Dict[int, int], Dict[str, float]]] = {
-    "long": {},
+    "detected": {},
     "score": {
         "captcha": 0.0,
         "clean": 0.0,
@@ -67,7 +67,6 @@ default_user_status: Dict[str, Union[Dict[int, int], Dict[str, float]]] = {
 left_group_ids: Set[int] = set()
 
 lock: Dict[str, Lock] = {
-    "image": Lock(),
     "regex": Lock()
 }
 
@@ -119,6 +118,7 @@ port: str = ""
 
 # [basic]
 bot_token: str = ""
+self_id: int = 0
 prefix: List[str] = []
 prefix_str: str = "/!"
 
@@ -164,6 +164,7 @@ try:
     port = config["port"].get("port", port)
     # [basic]
     bot_token = config["basic"].get("bot_token", bot_token)
+    self_id = int(bot_token.split(":")[0])
     prefix = list(config["basic"].get("prefix", prefix_str))
     # [bots]
     captcha_id = int(config["bots"].get("captcha_id", captcha_id))
@@ -203,6 +204,7 @@ if (enabled not in {"False", "True"}
         or hostname == ""
         or port == ""
         or bot_token in {"", "[DATA EXPUNGED]"}
+        or self_id == 0
         or prefix == []
         or captcha_id == 0
         or clean_id == 0
@@ -271,10 +273,17 @@ bad_ids: Dict[str, Set[Union[int, str]]] = {
 #     "users": {12345678}
 # }
 
+except_ids: Dict[str, Set[int]] = {
+    "channels": set()
+}
+# except_ids = {
+#     "channels": {-10012345678}
+# }
+
 user_ids: Dict[int, Dict[str, Union[float, Dict[Union[int, str], Union[float, int]], Set[int]]]] = {}
 # user_ids = {
 #     12345678: {
-#         "long": {},
+#         "detected": {},
 #         "score": {
 #             "captcha": 0.0,
 #             "clean": 0.0,
@@ -306,7 +315,7 @@ wb_words: Dict[str, int] = {}
 # }
 
 # Load data
-file_list: List[str] = ["admin_ids", "bad_ids", "user_ids", "configs"]
+file_list: List[str] = ["admin_ids", "bad_ids", "except_ids", "user_ids", "configs"]
 file_list += [f"{f}_words" for f in regex]
 for file in file_list:
     try:

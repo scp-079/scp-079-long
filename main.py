@@ -26,9 +26,9 @@ from telegram.ext import Updater
 
 from plugins import glovar
 from plugins.functions.timers import backup_files, reset_data, send_count, update_admins, update_status
-from plugins.handlers.command import handler_command
-from plugins.handlers.error import handler_error
-from plugins.handlers.message import handler_message
+from plugins.handlers.command import add_command_handlers
+from plugins.handlers.error import add_error_handlers
+from plugins.handlers.message import add_message_handlers
 
 # Enable logging
 logger = logging.getLogger(__name__)
@@ -36,13 +36,14 @@ logger = logging.getLogger(__name__)
 # Create the EventHandler
 updater = Updater(
     token=glovar.bot_token,
-    request_kwargs=glovar.request_kwargs
+    request_kwargs=glovar.request_kwargs,
+    use_context=True
 )
 
 # Register handlers
-handler_command(updater.dispatcher)
-handler_error(updater.dispatcher)
-handler_message(updater.dispatcher)
+add_command_handlers(updater.dispatcher)
+add_error_handlers(updater.dispatcher)
+add_message_handlers(updater.dispatcher)
 
 # Timer
 scheduler = BackgroundScheduler()

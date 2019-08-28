@@ -18,7 +18,31 @@ See [this article](https://scp-079.org/long/).
 
 ## Files
 
-Loading...
+- plugins
+    - functions
+        - `channel.py` : Functions about channel
+        - `etc.py` : Miscellaneous
+        - `file.py` : Save files
+        - `filters.py` : Some filters
+        - `fix.py` : Show steps to fix an error
+        - `group.py` : Functions about group
+        - `ids.py` : Modify id lists
+        - `receive.py` : Receive data from exchange channel
+        - `telegram.py` : Some telegram functions
+        - `tests.py` : Some test functions
+        - `timers.py` : Timer functions
+        - `user.py` : Functions about user and channel object
+    - handlers
+        - `command.py` : Handle commands
+        - `error.py` : Handle errors
+        - `message.py`: Handle messages
+    - `glovar.py` : Global variables
+- `.gitignore` : Ignore
+- `config.ini.example` -> `config.ini` : Configuration
+- `LICENSE` : GPLv3
+- `main.py` : Start here
+- `README.md` : This file
+- `requirements.txt` : Managed by pip
 
 ## Contribute
 
