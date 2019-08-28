@@ -160,8 +160,8 @@ try:
     config.read("config.ini")
     # [proxy]
     enabled = config["proxy"].get("enabled", enabled)
-    hostname = config["hostname"].get("hostname", hostname)
-    port = config["port"].get("port", port)
+    hostname = config["proxy"].get("hostname", hostname)
+    port = config["proxy"].get("port", port)
     # [basic]
     bot_token = config["basic"].get("bot_token", bot_token)
     self_id = int(bot_token.split(":")[0])
