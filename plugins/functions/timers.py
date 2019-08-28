@@ -120,14 +120,14 @@ def update_admins(client: Bot) -> bool:
             should_leave = True
             reason = "permissions"
             admin_members = get_admins(client, gid)
-            if admin_members and any([admin.user.id == glovar.self_id for admin in admin_members]):
+            if admin_members and any([admin.user.id == glovar.long_id for admin in admin_members]):
                 glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
                                          if not admin.user.is_bot}
                 if glovar.user_id not in glovar.admin_ids[gid]:
                     reason = "user"
                 else:
                     for admin in admin_members:
-                        if admin.user.id == glovar.self_id:
+                        if admin.user.id == glovar.long_id:
                             if admin.permissions.can_delete_messages and admin.permissions.can_restrict_members:
                                 should_leave = False
 
@@ -155,7 +155,7 @@ def update_admins(client: Bot) -> bool:
                                   f"群组 ID：{code(gid)}\n"
                                   f"状态：{code(reason)}\n")
                     thread(send_message, (client, glovar.debug_channel_id, debug_text))
-            elif admin_members is False or any([admin.user.id == glovar.self_id for admin in admin_members]) is False:
+            elif admin_members is False or any([admin.user.id == glovar.long_id for admin in admin_members]) is False:
                 # Bot is not in the chat, leave automatically without approve
                 group_name, group_link = get_group_info(client, gid)
                 leave_group(client, gid)

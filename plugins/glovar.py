@@ -124,7 +124,6 @@ port: str = ""
 
 # [basic]
 bot_token: str = ""
-self_id: int = 0
 prefix: List[str] = []
 prefix_str: str = "/!"
 
@@ -170,7 +169,6 @@ try:
     port = config["proxy"].get("port", port)
     # [basic]
     bot_token = config["basic"].get("bot_token", bot_token)
-    self_id = int(bot_token.split(":")[0])
     prefix = list(config["basic"].get("prefix", prefix_str))
     # [bots]
     captcha_id = int(config["bots"].get("captcha_id", captcha_id))
@@ -210,7 +208,6 @@ if (enabled not in {"False", "True"}
         or hostname == ""
         or port == ""
         or bot_token in {"", "[DATA EXPUNGED]"}
-        or self_id == 0
         or prefix == []
         or captcha_id == 0
         or clean_id == 0

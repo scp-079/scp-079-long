@@ -283,6 +283,9 @@ def is_long_text(message: Message) -> bool:
     try:
         text = get_text(message)
         if text:
+            if is_detected_user(message):
+                return True
+
             gid = message.chat.id
             length = len(text.encode())
             if length >= glovar.configs[gid]["limit"]:
