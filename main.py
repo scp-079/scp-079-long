@@ -42,8 +42,8 @@ updater = Updater(
 
 # Register handlers
 add_command_handlers(updater.dispatcher)
-add_error_handlers(updater.dispatcher)
 add_message_handlers(updater.dispatcher)
+add_error_handlers(updater.dispatcher)
 
 # Timer
 scheduler = BackgroundScheduler()

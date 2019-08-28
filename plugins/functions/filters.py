@@ -164,18 +164,6 @@ class FilterTestGroup(BaseFilter):
         return False
 
 
-class FilterText(BaseFilter):
-    # Check if the message is text
-    def filter(self, message: Message):
-        try:
-            if message and message.text:
-                return True
-        except Exception as e:
-            logger.warning(f"FilterText error: {e}", exc_info=True)
-
-        return False
-
-
 class_c = FilterClassC()
 
 class_d = FilterClassD()
@@ -191,8 +179,6 @@ hide_channel = FilterHideChannel()
 new_group = FilterNewGroup()
 
 test_group = FilterTestGroup()
-
-text_message = FilterText()
 
 
 def is_class_c(_, message: Message) -> bool:
