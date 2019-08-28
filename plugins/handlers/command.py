@@ -213,10 +213,11 @@ def long(update: Update, context: CallbackContext) -> bool:
 
         gid = message.chat.id
         mid = message.message_id
-        logger.warning(update)
+        import json
+        logger.warning(json.dumps(update, indent=4))
         if message.reply_to_message:
             if gid == glovar.test_group_id:
-                long_test(client, message)
+                long_test(client, message.reply_to_message)
             else:
                 if is_long_text(message.reply_to_message):
                     terminate_user(client, message.reply_to_message)
