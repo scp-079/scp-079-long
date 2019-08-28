@@ -213,13 +213,15 @@ def long(update: Update, context: CallbackContext) -> bool:
 
         gid = message.chat.id
         mid = message.message_id
-        thread(delete_message, (client, gid, mid))
+        logger.warning(update)
         if message.reply_to_message:
             if gid == glovar.test_group_id:
                 long_test(client, message)
             else:
                 if is_long_text(message.reply_to_message):
                     terminate_user(client, message.reply_to_message)
+
+        thread(delete_message, (client, gid, mid))
 
         return True
     except Exception as e:
