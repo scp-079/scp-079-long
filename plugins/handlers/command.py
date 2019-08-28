@@ -42,28 +42,28 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
             prefix=glovar.prefix,
             command=["config"],
             callback=config,
-            filters=Filters.text & Filters.update.messages & Filters.group & ~test_group
+            filters=(Filters.command | Filters.text) & Filters.update.messages & Filters.group & ~test_group
         ))
         # /config_long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["config_long"],
             callback=config_directly,
-            filters=Filters.text & Filters.update.messages & Filters.group & ~test_group
+            filters=(Filters.command | Filters.text) & Filters.update.messages & Filters.group & ~test_group
         ))
         # /long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["long", "l"],
             callback=long,
-            filters=Filters.text & Filters.update.messages & Filters.group
+            filters=(Filters.command | Filters.text) & Filters.update.messages & Filters.group
         ))
         # /version
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["version"],
             callback=version,
-            filters=Filters.text & Filters.update.messages & Filters.group & test_group
+            filters=(Filters.command | Filters.text) & Filters.update.messages & Filters.group & test_group
         ))
 
         return True
