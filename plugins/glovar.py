@@ -36,7 +36,13 @@ logger = logging.getLogger(__name__)
 
 # Init
 
-all_commands: List[str] = ["config", "config_long", "version"]
+all_commands: List[str] = [
+    "config",
+    "config_long",
+    "long",
+    "l"
+    "version"
+]
 
 declared_message_ids: Dict[int, Set[int]] = {}
 # declared_message_ids = {
@@ -94,7 +100,7 @@ sender: str = "LONG"
 
 should_hide: bool = False
 
-version: str = "0.0.1"
+version: str = "0.0.2"
 
 watch_ids: Dict[str, Dict[int, int]] = {
     "ban": {},
@@ -237,7 +243,7 @@ if (enabled not in {"False", "True"}
 enabled = eval(enabled)
 if enabled:
     request_kwargs = {
-        "proxy_url": f"socks5://{hostname}:{port}"
+        "proxy_url": f"socks5h://{hostname}:{port}/"
     }
 else:
     request_kwargs = None

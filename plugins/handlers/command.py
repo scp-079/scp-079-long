@@ -42,21 +42,28 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
             prefix=glovar.prefix,
             command=["config"],
             callback=config,
-            filters=Filters.group & ~test_group
+            filters=Filters.update.messages & Filters.group & ~test_group
         ))
         # /config_long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["config_long"],
             callback=config_directly,
-            filters=Filters.group & ~test_group
+            filters=Filters.update.messages & Filters.group & ~test_group
+        ))
+        # /long
+        dispatcher.add_handler(PrefixHandler(
+            prefix=glovar.prefix,
+            command=["long", "l"],
+            callback=long,
+            filters=Filters.update.messages & Filters.group
         ))
         # /version
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["version"],
-            callback=config_directly,
-            filters=Filters.group & test_group
+            callback=version,
+            filters=Filters.update.messages & Filters.group & test_group
         ))
 
         return True
@@ -70,7 +77,7 @@ def config(update: Update, context: CallbackContext) -> bool:
     # Request CONFIG session
     try:
         client = context.bot
-        message = update.message
+        message = update.edited_message or update.message
         if not message:
             return False
 
@@ -123,7 +130,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
     # Config the bot directly
     try:
         client = context.bot
-        message = update.message
+        message = update.edited_message or update.message
         if not message:
             return False
 
@@ -194,11 +201,30 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
     return False
 
 
+def long(update: Update, context: CallbackContext) -> bool:
+    # Fore to check long messages
+    try:
+        client = context.bot
+        message = update.edited_message or update.message
+        if not message:
+            return False
+
+        gid = message.chat.id
+        mid = message.message_id
+        thread(delete_message, (client, gid, mid))
+
+        return True
+    except Exception as e:
+        logger.warning(f"Long error: {e}", exc_info=True)
+
+    return False
+
+
 def version(update: Update, context: CallbackContext) -> bool:
     # Check the program's version
     try:
         client = context.bot
-        message = update.message
+        message = update.edited_message or update.message
         if not message:
             return False
 

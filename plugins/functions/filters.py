@@ -20,7 +20,7 @@ import logging
 import re
 from typing import Union
 
-from telegram import Message, Update
+from telegram import Message
 from telegram.ext import BaseFilter
 
 from .. import glovar
@@ -34,17 +34,13 @@ logger = logging.getLogger(__name__)
 
 class FilterClassC(BaseFilter):
     # Check if the message is Class C object
-    def filter(self, update: Update):
+    def filter(self, message: Message):
         try:
-            message = update.message
-            if not message:
-                return False
-
             if message.from_user:
                 uid = message.from_user.id
                 gid = message.chat.id
                 if init_group_id(gid):
-                    if uid in glovar.admin_ids.get(gid, set()) or uid in glovar.bot_ids or message.from_user.is_self:
+                    if uid in glovar.admin_ids.get(gid, set()) or uid in glovar.bot_ids:
                         return True
         except Exception as e:
             logger.warning(f"Is class c error: {e}", exc_info=True)
@@ -54,12 +50,8 @@ class FilterClassC(BaseFilter):
 
 class FilterClassD(BaseFilter):
     # Check if the message is Class D object
-    def filter(self, update: Update):
+    def filter(self, message: Message):
         try:
-            message = update.message
-            if not message:
-                return False
-
             if message.from_user:
                 uid = message.from_user.id
                 if uid in glovar.bad_ids["users"]:
@@ -82,12 +74,8 @@ class FilterClassD(BaseFilter):
 
 class FilterClassE(BaseFilter):
     # Check if the message is Class E object
-    def filter(self, update: Update) -> bool:
+    def filter(self, message: Message):
         try:
-            message = update.message
-            if not message:
-                return False
-
             if message.forward_from_chat:
                 cid = message.forward_from_chat.id
                 if cid in glovar.except_ids["channels"]:
@@ -100,12 +88,8 @@ class FilterClassE(BaseFilter):
 
 class FilterDeclaredMessage(BaseFilter):
     # Check if the message is declared by other bots
-    def filter(self, update: Update) -> bool:
+    def filter(self, message: Message):
         try:
-            message = update.message
-            if not message:
-                return False
-
             if message.chat:
                 gid = message.chat.id
                 mid = message.message_id
@@ -119,12 +103,8 @@ class FilterDeclaredMessage(BaseFilter):
 
 class FilterExchangeChannel(BaseFilter):
     # Check if the message is sent from the exchange channel
-    def filter(self, update: Update) -> bool:
+    def filter(self, message: Message):
         try:
-            message = update.message
-            if not message:
-                return False
-
             if message.chat:
                 cid = message.chat.id
                 if glovar.should_hide:
@@ -140,12 +120,8 @@ class FilterExchangeChannel(BaseFilter):
 
 class FilterHideChannel(BaseFilter):
     # Check if the message is sent from the hide channel
-    def filter(self, update: Update) -> bool:
+    def filter(self, message: Message):
         try:
-            message = update.message
-            if not message:
-                return False
-
             if message.chat:
                 cid = message.chat.id
                 if cid == glovar.hide_channel_id:
@@ -158,12 +134,8 @@ class FilterHideChannel(BaseFilter):
 
 class FilterNewGroup(BaseFilter):
     # Check if the bot joined a new group
-    def filter(self, update: Update) -> bool:
+    def filter(self, message: Message):
         try:
-            message = update.message
-            if not message:
-                return False
-
             if message.new_chat_members:
                 new_users = message.new_chat_members
                 if new_users:
@@ -180,12 +152,8 @@ class FilterNewGroup(BaseFilter):
 
 class FilterTestGroup(BaseFilter):
     # Check if the message is sent from the test group
-    def filter(self, update: Update):
+    def filter(self, message: Message):
         try:
-            message = update.message
-            if not message:
-                return False
-
             if message.chat:
                 cid = message.chat.id
                 if cid == glovar.test_group_id:

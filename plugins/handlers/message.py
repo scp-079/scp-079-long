@@ -46,16 +46,14 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
     try:
         # Check
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.group & ~test_group & ~class_c & ~class_d & ~class_e & ~declared_message,
-            callback=check,
-            edited_updates=True
+            filters=(Filters.update.messages & Filters.group & ~test_group & ~class_c & ~class_d & ~class_e
+                     & ~declared_message),
+            callback=check
         ))
         # Exchange emergency
         dispatcher.add_handler(MessageHandler(
             filters=Filters.update.channel_posts & hide_channel,
-            callback=exchange_emergency,
-            channel_post_updates=True,
-            edited_updates=True
+            callback=exchange_emergency
         ))
         # Init group
         dispatcher.add_handler(MessageHandler(
@@ -66,15 +64,12 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
         # Process data
         dispatcher.add_handler(MessageHandler(
             filters=Filters.update.channel_posts & exchange_channel,
-            callback=process_data,
-            channel_post_updates=True,
-            edited_updates=True
+            callback=process_data
         ))
         # Test
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.group & test_group & Filters.text,
-            callback=test,
-            edited_updates=True
+            filters=Filters.update.messages & Filters.group & test_group,
+            callback=test
         ))
 
         return True
@@ -88,7 +83,7 @@ def check(update: Update, context: CallbackContext) -> bool:
     # Check the messages sent from groups
     try:
         client = context.bot
-        message = update.message
+        message = update.edited_message or update.message
         if not message:
             return False
 
@@ -105,7 +100,7 @@ def check(update: Update, context: CallbackContext) -> bool:
 def exchange_emergency(update: Update, _: CallbackContext) -> bool:
     # Sent emergency channel transfer request
     try:
-        message = update.message
+        message = update.edited_message or update.message
         if not message:
             return False
 
@@ -136,7 +131,7 @@ def init_group(update: Update, context: CallbackContext) -> bool:
     # Initiate new groups
     try:
         client = context.bot
-        message = update.message
+        message = update.edited_message or update.message
         if not message:
             return False
 
@@ -183,7 +178,7 @@ def process_data(update: Update, context: CallbackContext) -> bool:
     # Process the data in exchange channel
     try:
         client = context.bot
-        message = update.message
+        message = update.edited_message or update.message
         if not message:
             return False
 
@@ -353,7 +348,7 @@ def test(update: Update, context: CallbackContext) -> bool:
     # Show test results in TEST group
     try:
         client = context.bot
-        message = update.message
+        message = update.edited_message or update.message
         if not message:
             return False
 
