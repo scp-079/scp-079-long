@@ -29,6 +29,7 @@ from ..functions.etc import bold, code, get_command_context, get_command_type, g
 from ..functions.file import save
 from ..functions.filters import is_class_c, is_long_text, test_group
 from ..functions.telegram import delete_message, get_group_info, send_message, send_report_message
+from ..functions.tests import long_test
 from ..functions.user import terminate_user
 
 # Enable logging
@@ -57,7 +58,7 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
             prefix=glovar.prefix,
             command=["long", "l"],
             callback=long,
-            filters=Filters.update.messages & (Filters.command | Filters.text) & Filters.update.messages & Filters.group
+            filters=Filters.update.messages & (Filters.command | Filters.text) & Filters.group
         ))
         # /version
         dispatcher.add_handler(PrefixHandler(
@@ -214,8 +215,11 @@ def long(update: Update, context: CallbackContext) -> bool:
         mid = message.message_id
         thread(delete_message, (client, gid, mid))
         if message.reply_to_message:
-            if is_long_text(message.reply_to_message):
-                terminate_user(client, message.reply_to_message)
+            if gid == glovar.test_group_id:
+                long_test(client, message)
+            else:
+                if is_long_text(message.reply_to_message):
+                    terminate_user(client, message.reply_to_message)
 
         return True
     except Exception as e:
