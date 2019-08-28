@@ -22,7 +22,7 @@ import re
 from telegram import Bot, Message
 
 from .. import glovar
-from .etc import code, get_int, get_text, thread, user_mention
+from .etc import code, get_text, thread, user_mention
 from .telegram import send_message
 
 # Enable logging
@@ -35,7 +35,7 @@ def long_test(client: Bot, message: Message) -> bool:
         message_text = get_text(message)
         if message_text:
             if re.search("^管理员：[0-9]", message_text):
-                aid = get_int(message_text.split("\n")[0].split("：")[1])
+                return True
             else:
                 aid = message.from_user.id
 
