@@ -214,7 +214,7 @@ def long(update: Update, context: CallbackContext) -> bool:
         gid = message.chat.id
         mid = message.message_id
         import json
-        logger.warning(json.dumps(update, indent=4))
+        logger.warning(json.dumps(json.loads(str(update))))
         if message.reply_to_message:
             if gid == glovar.test_group_id:
                 long_test(client, message.reply_to_message)
