@@ -207,14 +207,6 @@ def long(update: Update, context: CallbackContext) -> bool:
         mid = message.message_id
         thread(delete_message, (client, gid, mid))
 
-        # Check the edited super long messages
-        r_message = message.reply_to_message
-        if r_message:
-            r_mid = r_message.message_id
-            r_text = r_message.text
-            if r_text == "0":
-                thread(delete_message, (client, gid, r_mid))
-
         return True
     except Exception as e:
         logger.warning(f"Long error: {e}", exc_info=True)
