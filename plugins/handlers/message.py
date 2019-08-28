@@ -171,7 +171,6 @@ def init_group(update: Update, context: CallbackContext) -> bool:
 def process_data(update: Update, context: CallbackContext) -> bool:
     # Process the data in exchange channel
     try:
-        logger.warning(update)
         client = context.bot
         message = update.effective_message
 
