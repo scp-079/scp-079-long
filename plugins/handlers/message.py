@@ -52,7 +52,7 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
         ))
         # Exchange emergency
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.update.channel_posts & hide_channel,
+            filters=Filters.update.channel_post & hide_channel,
             callback=exchange_emergency
         ))
         # Init group
@@ -63,7 +63,7 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
         ))
         # Process data
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.update.channel_posts & exchange_channel,
+            filters=Filters.update.channel_post & exchange_channel,
             callback=process_data
         ))
         # Test
@@ -84,8 +84,6 @@ def check(update: Update, context: CallbackContext) -> bool:
     try:
         client = context.bot
         message = update.effective_message
-        if not message:
-            return False
 
         if is_long_text(message):
             terminate_user(client, message)
@@ -100,9 +98,7 @@ def check(update: Update, context: CallbackContext) -> bool:
 def exchange_emergency(update: Update, _: CallbackContext) -> bool:
     # Sent emergency channel transfer request
     try:
-        message = update.edited_message or update.message
-        if not message:
-            return False
+        message = update.effective_message
 
         # Read basic information
         data = receive_text_data(message)
@@ -131,9 +127,7 @@ def init_group(update: Update, context: CallbackContext) -> bool:
     # Initiate new groups
     try:
         client = context.bot
-        message = update.edited_message or update.message
-        if not message:
-            return False
+        message = update.effective_message
 
         gid = message.chat.id
         text = get_debug_text(client, message.chat)
@@ -177,10 +171,9 @@ def init_group(update: Update, context: CallbackContext) -> bool:
 def process_data(update: Update, context: CallbackContext) -> bool:
     # Process the data in exchange channel
     try:
+        logger.warning(update)
         client = context.bot
-        message = update.edited_message or update.message
-        if not message:
-            return False
+        message = update.effective_message
 
         data = receive_text_data(message)
         if data:
@@ -349,9 +342,6 @@ def test(update: Update, context: CallbackContext) -> bool:
     try:
         client = context.bot
         message = update.effective_message
-        print(message)
-        if not message:
-            return False
 
         long_test(client, message)
 
