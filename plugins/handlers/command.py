@@ -27,8 +27,9 @@ from .. import glovar
 from ..functions.channel import get_debug_text, share_data
 from ..functions.etc import bold, code, get_command_context, get_command_type, get_int, get_now, thread, user_mention
 from ..functions.file import save
-from ..functions.filters import is_class_c, test_group
+from ..functions.filters import is_class_c, is_long_text, test_group
 from ..functions.telegram import delete_message, get_group_info, send_message, send_report_message
+from ..functions.user import terminate_user
 
 # Enable logging
 logger = logging.getLogger(__name__)
@@ -42,28 +43,28 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
             prefix=glovar.prefix,
             command=["config"],
             callback=config,
-            filters=(Filters.command | Filters.text) & Filters.update.messages & Filters.group & ~test_group
+            filters=Filters.update.messages & (Filters.command | Filters.text) & Filters.group & ~test_group
         ))
         # /config_long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["config_long"],
             callback=config_directly,
-            filters=(Filters.command | Filters.text) & Filters.update.messages & Filters.group & ~test_group
+            filters=Filters.update.messages & (Filters.command | Filters.text) & Filters.group & ~test_group
         ))
         # /long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["long", "l"],
             callback=long,
-            filters=(Filters.command | Filters.text) & Filters.update.messages & Filters.group
+            filters=Filters.update.messages & (Filters.command | Filters.text) & Filters.update.messages & Filters.group
         ))
         # /version
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["version"],
             callback=version,
-            filters=(Filters.command | Filters.text) & Filters.update.messages & Filters.group & test_group
+            filters=Filters.update.messages & (Filters.command | Filters.text) & Filters.group & test_group
         ))
 
         return True
@@ -212,6 +213,9 @@ def long(update: Update, context: CallbackContext) -> bool:
         gid = message.chat.id
         mid = message.message_id
         thread(delete_message, (client, gid, mid))
+        if message.reply_to_message:
+            if is_long_text(message.reply_to_message):
+                terminate_user(client, message.reply_to_message)
 
         return True
     except Exception as e:
