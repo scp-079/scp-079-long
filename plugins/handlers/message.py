@@ -237,20 +237,6 @@ def process_data(update: Update, context: CallbackContext) -> bool:
                         elif action_type == "score":
                             receive_user_score(sender, data)
 
-                elif sender == "LONG":
-
-                    if action == "add":
-                        if action_type == "bad":
-                            receive_add_bad(sender, data)
-                        elif action_type == "watch":
-                            receive_watch_user(data)
-
-                    elif action == "update":
-                        if action_type == "declare":
-                            receive_declared_message(data)
-                        elif action_type == "score":
-                            receive_user_score(sender, data)
-
                 elif sender == "MANAGE":
 
                     if action == "add":
@@ -272,6 +258,20 @@ def process_data(update: Update, context: CallbackContext) -> bool:
                             receive_remove_watch(data)
 
                 elif sender == "NOFLOOD":
+
+                    if action == "add":
+                        if action_type == "bad":
+                            receive_add_bad(sender, data)
+                        elif action_type == "watch":
+                            receive_watch_user(data)
+
+                    elif action == "update":
+                        if action_type == "declare":
+                            receive_declared_message(data)
+                        elif action_type == "score":
+                            receive_user_score(sender, data)
+
+                elif sender == "NOPORN":
 
                     if action == "add":
                         if action_type == "bad":
