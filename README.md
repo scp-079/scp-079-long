@@ -17,7 +17,6 @@ See [this article](https://scp-079.org/long/).
 - pip: `pip install -r requirements.txt` or `pip install -U APScheduler OpenCC pyAesCrypt python-telegram-bot[socks]==12.0.0b1`
 - Do a small fix: https://github.com/python-telegram-bot/python-telegram-bot/issues/1424
 
-
 ## Files
 
 - plugins
