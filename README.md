@@ -25,7 +25,6 @@ See [this article](https://scp-079.org/long/).
         - `etc.py` : Miscellaneous
         - `file.py` : Save files
         - `filters.py` : Some filters
-        - `fix.py` : Show steps to fix an error
         - `group.py` : Functions about group
         - `ids.py` : Modify id lists
         - `receive.py` : Receive data from exchange channel
