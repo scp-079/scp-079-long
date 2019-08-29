@@ -128,7 +128,7 @@ def update_admins(client: Bot) -> bool:
                 else:
                     for admin in admin_members:
                         if admin.user.id == glovar.long_id:
-                            if admin.permissions.can_delete_messages and admin.permissions.can_restrict_members:
+                            if admin.can_delete_messages and admin.can_restrict_members:
                                 should_leave = False
 
                 if should_leave:
