@@ -46,8 +46,8 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
     try:
         # Check
         dispatcher.add_handler(MessageHandler(
-            filters=(Filters.update.messages & Filters.group & ~test_group & ~class_c & ~class_d & ~class_e
-                     & ~declared_message),
+            filters=(Filters.update.messages & Filters.group & ~test_group & ~Filters.status_update
+                     & ~class_c & ~class_d & ~class_e & ~declared_message),
             callback=check
         ))
         # Exchange emergency
