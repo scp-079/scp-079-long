@@ -294,6 +294,7 @@ user_ids: Dict[int, Dict[str, Union[float, Dict[Union[int, str], Union[float, in
 #             "long": 0.0,
 #             "noflood": 0.0,
 #             "noporn": 0.0,
+#             "nospam": 0.0,
 #             "recheck": 0.0,
 #             "warn": 0.0
 #         }
@@ -308,6 +309,7 @@ configs: Dict[int, Dict[str, Union[bool, int]]] = {}
 #         "default": True,
 #         "lock": 0,
 #         "limit": 9000
+#     }
 # }
 
 # Init word variables
