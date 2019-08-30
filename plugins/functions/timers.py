@@ -121,8 +121,7 @@ def update_admins(client: Bot) -> bool:
             reason = "permissions"
             admin_members = get_admins(client, gid)
             if admin_members and any([admin.user.id == glovar.long_id for admin in admin_members]):
-                glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
-                                         if not admin.user.is_bot}
+                glovar.admin_ids[gid] = {admin.user.id for admin in admin_members if not admin.user.is_bot}
                 if glovar.user_id not in glovar.admin_ids[gid]:
                     reason = "user"
                 else:
