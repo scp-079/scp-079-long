@@ -31,22 +31,25 @@ logger = logging.getLogger(__name__)
 
 def long_test(client: Bot, message: Message) -> bool:
     # Test message's length
-    try:
-        message_text = get_text(message)
-        if message_text:
-            if re.search("^管理员：[0-9]", message_text):
-                return True
-            else:
-                aid = message.from_user.id
+    if glovar.locks["test"].acquire():
+        try:
+            message_text = get_text(message)
+            if message_text:
+                if re.search("^管理员：[0-9]", message_text):
+                    return True
+                else:
+                    aid = message.from_user.id
 
-            length = len(message_text.encode())
-            if length >= 2000:
-                text = (f"管理员：{user_mention(aid)}\n\n"
-                        f"消息字节长度：{code(length)}\n")
-                thread(send_message, (client, glovar.test_group_id, text, message.message_id))
+                length = len(message_text.encode())
+                if length >= 2000:
+                    text = (f"管理员：{user_mention(aid)}\n\n"
+                            f"消息字节长度：{code(length)}\n")
+                    thread(send_message, (client, glovar.test_group_id, text, message.message_id))
 
-        return True
-    except Exception as e:
-        logger.warning(f"Long test error: {e}", exc_info=True)
+            return True
+        except Exception as e:
+            logger.warning(f"Long test error: {e}", exc_info=True)
+        finally:
+            glovar.locks["test"].release()
 
     return False

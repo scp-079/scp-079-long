@@ -177,7 +177,7 @@ def receive_regex(client: Bot, message: Message, data: str) -> bool:
         file_name = data
         words_data = receive_file_data(client, message, True)
         if words_data:
-            if glovar.lock["regex"].acquire():
+            if glovar.locks["regex"].acquire():
                 try:
                     pop_set = set(eval(f"glovar.{file_name}")) - set(words_data)
                     new_set = set(words_data) - set(eval(f"glovar.{file_name}"))
@@ -191,7 +191,7 @@ def receive_regex(client: Bot, message: Message, data: str) -> bool:
                 except Exception as e:
                     logger.warning(f"Update download regex error: {e}", exc_info=True)
                 finally:
-                    glovar.lock["regex"].release()
+                    glovar.locks["regex"].release()
 
         return True
     except Exception as e:

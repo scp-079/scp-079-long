@@ -72,8 +72,10 @@ default_user_status: Dict[str, Dict[Union[int, str], Union[float, int]]] = {
 
 left_group_ids: Set[int] = set()
 
-lock: Dict[str, Lock] = {
-    "regex": Lock()
+locks: Dict[str, Lock] = {
+    "message": Lock(),
+    "regex": Lock(),
+    "test": Lock()
 }
 
 receivers: Dict[str, List[str]] = {

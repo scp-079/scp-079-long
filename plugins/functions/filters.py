@@ -280,18 +280,21 @@ def is_high_score_user(message: Message) -> Union[bool, float]:
 
 def is_long_text(message: Message) -> bool:
     # Check if the text is super long
-    try:
-        text = get_text(message)
-        if text:
-            if is_detected_user(message):
-                return True
+    if glovar.locks["message"].acquire():
+        try:
+            text = get_text(message)
+            if text:
+                if is_detected_user(message):
+                    return True
 
-            gid = message.chat.id
-            length = len(text.encode())
-            if length >= glovar.configs[gid]["limit"]:
-                return True
-    except Exception as e:
-        logger.warning(f"Is long text error: {e}", exc_info=True)
+                gid = message.chat.id
+                length = len(text.encode())
+                if length >= glovar.configs[gid]["limit"]:
+                    return True
+        except Exception as e:
+            logger.warning(f"Is long text error: {e}", exc_info=True)
+        finally:
+            glovar.locks["message"].release()
 
     return False
 
