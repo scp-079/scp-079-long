@@ -25,7 +25,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from telegram.ext import Updater
 
 from plugins import glovar
-from plugins.functions.timers import backup_files, reset_data, send_count, update_admins, update_status
+from plugins.functions.timers import backup_files, interval_min_10, reset_data, send_count, update_admins, update_status
 from plugins.handlers.command import add_command_handlers
 from plugins.handlers.error import add_error_handlers
 from plugins.handlers.message import add_message_handlers
@@ -47,6 +47,7 @@ add_error_handlers(updater.dispatcher)
 
 # Timer
 scheduler = BackgroundScheduler()
+scheduler.add_job(interval_min_10, "interval", minutes=10)
 scheduler.add_job(update_status, "cron", [updater.bot], minute=30)
 scheduler.add_job(backup_files, "cron", [updater.bot], hour=20)
 scheduler.add_job(send_count, "cron", [updater.bot], hour=21)
