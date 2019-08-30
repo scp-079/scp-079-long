@@ -139,26 +139,21 @@ def terminate_user(client: Bot, message: Message) -> bool:
                         update_score(client, uid)
 
                     send_debug(client, message.chat, "追踪删除", uid, mid, result)
-            elif is_detected_user(message):
+            elif is_detected_user(message) or uid in glovar.recorded_ids[gid]:
                 delete_message(client, gid, mid)
                 add_detected_user(gid, uid)
                 declare_message(client, gid, mid)
             else:
-                if uid in glovar.recorded_ids[gid]:
+                result = forward_evidence(client, message, "自动删除", "群组自定义")
+                if result:
+                    glovar.recorded_ids[gid].add(uid)
                     delete_message(client, gid, mid)
-                    add_detected_user(gid, uid)
                     declare_message(client, gid, mid)
-                else:
-                    result = forward_evidence(client, message, "自动删除", "群组自定义")
-                    if result:
-                        glovar.recorded_ids[gid].add(uid)
-                        delete_message(client, gid, mid)
-                        declare_message(client, gid, mid)
-                        previous = add_detected_user(gid, uid)
-                        if not previous:
-                            update_score(client, uid)
+                    previous = add_detected_user(gid, uid)
+                    if not previous:
+                        update_score(client, uid)
 
-                        send_debug(client, message.chat, "自动删除", uid, mid, result)
+                    send_debug(client, message.chat, "自动删除", uid, mid, result)
 
             return True
     except Exception as e:
