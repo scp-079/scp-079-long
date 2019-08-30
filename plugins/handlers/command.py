@@ -164,13 +164,13 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
                                     new_config["limit"] = limit
                                 else:
                                     success = False
-                                    reason = "错误的数值"
+                                    reason = "命令参数有误"
                             else:
                                 success = False
                                 reason = "命令类别有误"
                         else:
                             success = False
-                            reason = "命令选项缺失"
+                            reason = "命令参数缺失"
 
                         if success:
                             new_config["default"] = False
