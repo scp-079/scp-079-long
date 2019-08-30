@@ -88,8 +88,9 @@ def check(update: Update, context: CallbackContext) -> bool:
         if not message.from_user:
             return True
 
+        # Super long message
         if is_long_text(message):
-            terminate_user(client, message)
+            return terminate_user(client, message)
 
         return True
     except Exception as e:
