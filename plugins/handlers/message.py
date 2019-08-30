@@ -68,7 +68,7 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
         ))
         # Test
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.update.messages & Filters.group & test_group,
+            filters=Filters.update.messages & Filters.group & test_group & ~Filters.status_update,
             callback=test
         ))
 
