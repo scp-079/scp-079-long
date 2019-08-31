@@ -116,7 +116,9 @@ def config(update: Update, context: CallbackContext) -> bool:
                              f"操作：{code('创建设置会话')}\n")
                     thread(send_message, (client, glovar.debug_channel_id, text))
 
-        delay(3, delete_message, [client, gid, mid])
+            delay(3, delete_message, [client, gid, mid])
+        else:
+            thread(delete_message, (client, gid, mid))
 
         return True
     except Exception as e:
