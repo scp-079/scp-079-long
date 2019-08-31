@@ -25,7 +25,7 @@ from .etc import crypt_str, get_full_name, get_now, thread
 from .channel import ask_for_help, declare_message, forward_evidence, send_debug, share_bad_user
 from .channel import share_watch_ban_user, update_score
 from .file import save
-from .filters import is_class_d, is_detected_user, is_high_score_user, is_regex_text, is_watch_ban, is_watch_delete
+from .filters import is_class_d, is_detected_user, is_high_score_user, is_regex_text, is_watch_user
 from .ids import init_user_id
 from .telegram import delete_message, kick_chat_member
 
@@ -109,7 +109,7 @@ def terminate_user(client: Bot, message: Message) -> bool:
                     declare_message(client, gid, mid)
                     ask_for_help(client, "ban", gid, uid)
                     send_debug(client, message.chat, "昵称封禁", uid, mid, result)
-            elif is_watch_ban(message):
+            elif is_watch_user(message, "ban"):
                 result = forward_evidence(client, message, "自动封禁", "敏感追踪")
                 if result:
                     add_bad_user(client, uid)
@@ -127,7 +127,7 @@ def terminate_user(client: Bot, message: Message) -> bool:
                     declare_message(client, gid, mid)
                     ask_for_help(client, "ban", gid, uid)
                     send_debug(client, message.chat, "评分封禁", uid, mid, result)
-            elif is_watch_delete(message):
+            elif is_watch_user(message, "delete"):
                 result = forward_evidence(client, message, "自动删除", "敏感追踪")
                 if result:
                     add_watch_ban_user(client, uid)
