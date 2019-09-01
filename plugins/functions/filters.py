@@ -181,6 +181,20 @@ new_group = FilterNewGroup()
 test_group = FilterTestGroup()
 
 
+def is_ban_text(text: str) -> bool:
+    # Check if the text is ban text
+    try:
+        if is_regex_text("ban", text):
+            return True
+
+        if is_regex_text("ad", text) and is_regex_text("con", text):
+            return True
+    except Exception as e:
+        logger.warning(f"Is ban text error: {e}", exc_info=True)
+
+    return False
+
+
 def is_class_c(_, message: Message) -> bool:
     # Check if the message is Class C object
     try:
@@ -290,6 +304,12 @@ def is_long_text(message: Message) -> bool:
                 gid = message.chat.id
                 length = len(text.encode())
                 if length >= glovar.configs[gid]["limit"]:
+                    # Work with NOSPAM
+                    if length <= 10000:
+                        if glovar.nospam_id in glovar.admin_ids[gid]:
+                            if is_ban_text(text or get_text(message)):
+                                return False
+
                     return True
         except Exception as e:
             logger.warning(f"Is long text error: {e}", exc_info=True)
