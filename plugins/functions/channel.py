@@ -292,7 +292,7 @@ def share_regex_count(client: Bot, word_type: str) -> bool:
     return False
 
 
-def share_watch_ban_user(client: Bot, uid: int, until: str) -> bool:
+def share_watch_user(client: Bot, the_type: str, uid: int, until: str) -> bool:
     # Share a watch ban user with other bots
     try:
         share_data(
@@ -302,14 +302,14 @@ def share_watch_ban_user(client: Bot, uid: int, until: str) -> bool:
             action_type="watch",
             data={
                 "id": uid,
-                "type": "ban",
+                "type": the_type,
                 "until": until
             }
         )
 
         return True
     except Exception as e:
-        logger.warning(f"Share watch ban user error: {e}", exc_info=True)
+        logger.warning(f"Share watch user error: {e}", exc_info=True)
 
 
 def update_score(client: Bot, uid: int) -> bool:
