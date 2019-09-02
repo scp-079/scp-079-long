@@ -107,19 +107,6 @@ should_hide: bool = False
 
 version: str = "0.0.2"
 
-watch_ids: Dict[str, Dict[int, int]] = {
-    "ban": {},
-    "delete": {}
-}
-# watch_ids = {
-#     "ban": {
-#         12345678: 0
-#     },
-#     "delete": {
-#         12345678: 0
-#     }
-# }
-
 # Read data from config.ini
 
 # [proxy]
@@ -306,6 +293,19 @@ user_ids: Dict[int, Dict[str, Dict[Union[int, str], Union[float, int]]]] = {}
 #     }
 # }
 
+watch_ids: Dict[str, Dict[int, int]] = {
+    "ban": {},
+    "delete": {}
+}
+# watch_ids = {
+#     "ban": {
+#         12345678: 0
+#     },
+#     "delete": {
+#         12345678: 0
+#     }
+# }
+
 # Init data variables
 
 configs: Dict[int, Dict[str, Union[bool, int]]] = {}
@@ -327,7 +327,7 @@ for word_type in regex:
 # }
 
 # Load data
-file_list: List[str] = ["admin_ids", "bad_ids", "except_ids", "user_ids", "configs"]
+file_list: List[str] = ["admin_ids", "bad_ids", "except_ids", "user_ids", "watch_ids", "configs"]
 file_list += [f"{f}_words" for f in regex]
 for file in file_list:
     try:
