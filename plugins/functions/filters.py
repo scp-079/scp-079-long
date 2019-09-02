@@ -40,7 +40,7 @@ class FilterClassC(BaseFilter):
                 uid = message.from_user.id
                 gid = message.chat.id
                 if init_group_id(gid):
-                    if uid in glovar.admin_ids.get(gid, set()) or uid in glovar.bot_ids:
+                    if uid in glovar.admin_ids[gid] or uid in glovar.bot_ids:
                         return True
         except Exception as e:
             logger.warning(f"Is class c error: {e}", exc_info=True)
