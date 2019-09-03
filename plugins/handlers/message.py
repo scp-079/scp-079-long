@@ -315,9 +315,7 @@ def process_data(update: Update, context: CallbackContext) -> bool:
                     if action == "update":
                         if action_type == "download":
                             receive_regex(client, message, data)
-
-                    elif action == "update":
-                        if action_type == "count":
+                        elif action_type == "count":
                             if data == "ask":
                                 send_count(client)
 
