@@ -349,14 +349,17 @@ def process_data(update: Update, context: CallbackContext) -> bool:
 
 def test(update: Update, context: CallbackContext) -> bool:
     # Show test results in TEST group
-    try:
-        client = context.bot
-        message = update.effective_message
+    if glovar.locks["test"].acquire():
+        try:
+            client = context.bot
+            message = update.effective_message
 
-        long_test(client, message)
+            long_test(client, message)
 
-        return True
-    except Exception as e:
-        logger.warning(f"Test error: {e}", exc_info=True)
+            return True
+        except Exception as e:
+            logger.warning(f"Test error: {e}", exc_info=True)
+        finally:
+            glovar.locks["test"].release()
 
     return False
