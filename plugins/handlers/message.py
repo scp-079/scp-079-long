@@ -82,20 +82,23 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
 
 def check(update: Update, context: CallbackContext) -> bool:
     # Check the messages sent from groups
-    try:
-        client = context.bot
-        message = update.effective_message
+    if glovar.locks["message"].acquire():
+        try:
+            client = context.bot
+            message = update.effective_message
 
-        if not message.from_user:
+            if not message.from_user:
+                return True
+
+            # Super long message
+            if is_long_text(message):
+                return terminate_user(client, message)
+
             return True
-
-        # Super long message
-        if is_long_text(message):
-            return terminate_user(client, message)
-
-        return True
-    except Exception as e:
-        logger.warning(f"Check error: {e}", exc_info=True)
+        except Exception as e:
+            logger.warning(f"Check error: {e}", exc_info=True)
+        finally:
+            glovar.locks["message"].release()
 
     return False
 
