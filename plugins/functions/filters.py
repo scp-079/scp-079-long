@@ -118,6 +118,18 @@ class FilterExchangeChannel(BaseFilter):
         return False
 
 
+class FilterFromUser(BaseFilter):
+    # Check if the message is sent from a user
+    def filter(self, message: Message):
+        try:
+            if message.from_user:
+                return True
+        except Exception as e:
+            logger.warning(f"FilterFromUser error: {e}", exc_info=True)
+
+        return False
+
+
 class FilterHideChannel(BaseFilter):
     # Check if the message is sent from the hide channel
     def filter(self, message: Message):
@@ -173,6 +185,8 @@ class_e = FilterClassE()
 declared_message = FilterDeclaredMessage()
 
 exchange_channel = FilterExchangeChannel()
+
+from_user = FilterFromUser()
 
 hide_channel = FilterHideChannel()
 

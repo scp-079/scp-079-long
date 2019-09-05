@@ -25,7 +25,7 @@ from .. import glovar
 from ..functions.channel import get_debug_text
 from ..functions.etc import code, thread, user_mention
 from ..functions.file import save
-from ..functions.filters import class_c, class_d, class_e, declared_message, exchange_channel, hide_channel
+from ..functions.filters import class_c, class_d, class_e, declared_message, exchange_channel, from_user, hide_channel
 from ..functions.filters import is_declared_message, is_long_text, new_group, test_group
 from ..functions.group import leave_group
 from ..functions.ids import init_group_id
@@ -47,7 +47,7 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
     try:
         # Check
         dispatcher.add_handler(MessageHandler(
-            filters=(Filters.update.messages & Filters.group & ~test_group & ~Filters.status_update
+            filters=(Filters.update.messages & Filters.group & ~test_group & from_user & ~Filters.status_update
                      & ~class_c & ~class_d & ~class_e & ~declared_message),
             callback=check
         ))
@@ -58,8 +58,8 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
         ))
         # Init group
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.group & ~test_group & (Filters.status_update.new_chat_members
-                                                   | Filters.status_update.chat_created) & new_group,
+            filters=Filters.group & ~test_group & from_user & (Filters.status_update.new_chat_members
+                                                               | Filters.status_update.chat_created) & new_group,
             callback=init_group
         ))
         # Process data
@@ -69,7 +69,7 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
         ))
         # Test
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.update.messages & Filters.group & test_group & ~Filters.status_update,
+            filters=Filters.update.messages & Filters.group & test_group & from_user & ~Filters.status_update,
             callback=test
         ))
 
@@ -86,9 +86,6 @@ def check(update: Update, context: CallbackContext) -> bool:
         try:
             client = context.bot
             message = update.effective_message
-
-            if not message.from_user:
-                return True
 
             # Check declare status
             if is_declared_message(message):

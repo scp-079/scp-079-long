@@ -28,7 +28,7 @@ from ..functions.channel import get_debug_text, share_data
 from ..functions.etc import bold, code, delay, get_command_context, get_command_type, get_int, get_now
 from ..functions.etc import thread, user_mention
 from ..functions.file import save
-from ..functions.filters import is_class_c, test_group
+from ..functions.filters import from_user, is_class_c, test_group
 from ..functions.telegram import delete_message, get_group_info, send_message, send_report_message
 
 # Enable logging
@@ -43,28 +43,28 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
             prefix=glovar.prefix,
             command=["config"],
             callback=config,
-            filters=Filters.update.messages & Filters.group & ~test_group
+            filters=Filters.update.messages & Filters.group & ~test_group & from_user
         ))
         # /config_long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["config_long"],
             callback=config_directly,
-            filters=Filters.update.messages & Filters.group & ~test_group
+            filters=Filters.update.messages & Filters.group & ~test_group & from_user
         ))
         # /long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["long", "l"],
             callback=long,
-            filters=Filters.update.messages & Filters.group
+            filters=Filters.update.messages & Filters.group & from_user
         ))
         # /version
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["version"],
             callback=version,
-            filters=Filters.update.messages & Filters.group & test_group
+            filters=Filters.update.messages & Filters.group & test_group & from_user
         ))
 
         return True
