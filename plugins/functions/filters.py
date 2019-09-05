@@ -233,6 +233,20 @@ def is_class_d(_, message: Message) -> bool:
     return False
 
 
+def is_declared_message(message: Message) -> bool:
+    # Check if the message is declared by other bots
+    try:
+        if message.chat:
+            gid = message.chat.id
+            mid = message.message_id
+            if mid in glovar.declared_message_ids.get(gid, set()):
+                return True
+    except Exception as e:
+        logger.warning(f"FilterDeclaredMessage error: {e}", exc_info=True)
+
+    return False
+
+
 def is_detected_user(message: Message) -> bool:
     # Check if the message is sent by a detected user
     try:

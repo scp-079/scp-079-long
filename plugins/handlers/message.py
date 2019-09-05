@@ -26,7 +26,7 @@ from ..functions.channel import get_debug_text
 from ..functions.etc import code, thread, user_mention
 from ..functions.file import save
 from ..functions.filters import class_c, class_d, class_e, declared_message, exchange_channel, hide_channel
-from ..functions.filters import is_long_text, new_group, test_group
+from ..functions.filters import is_declared_message, is_long_text, new_group, test_group
 from ..functions.group import leave_group
 from ..functions.ids import init_group_id
 from ..functions.receive import receive_add_bad, receive_add_except, receive_config_commit, receive_config_reply
@@ -88,6 +88,10 @@ def check(update: Update, context: CallbackContext) -> bool:
             message = update.effective_message
 
             if not message.from_user:
+                return True
+
+            # Check declare status
+            if is_declared_message(message):
                 return True
 
             # Super long message
