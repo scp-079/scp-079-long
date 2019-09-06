@@ -278,7 +278,9 @@ except_ids: Dict[str, Set[int]] = {
 user_ids: Dict[int, Dict[str, Dict[Union[int, str], Union[float, int]]]] = {}
 # user_ids = {
 #     12345678: {
-#         "detected": {},
+#         "detected": {
+#               -10012345678: 1512345678
+#         },
 #         "score": {
 #             "captcha": 0.0,
 #             "clean": 0.0,
