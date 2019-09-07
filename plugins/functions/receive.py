@@ -45,7 +45,8 @@ def receive_add_except(_: Bot, data: dict) -> bool:
         # Receive except channels
         if the_type == "channel":
             glovar.except_ids["channels"].add(the_id)
-            save("except_ids")
+
+        save("except_ids")
 
         return True
     except Exception as e:
@@ -61,10 +62,10 @@ def receive_add_bad(sender: str, data: dict) -> bool:
         the_type = data["type"]
         if the_type == "user":
             glovar.bad_ids["users"].add(the_id)
-            save("bad_ids")
         elif sender == "MANAGE" and the_type == "channel":
             glovar.bad_ids["channels"].add(the_id)
-            save("bad_ids")
+
+        save("bad_ids")
 
         return True
     except Exception as e:
@@ -269,7 +270,8 @@ def receive_remove_except(_: Bot, data: dict) -> bool:
         # Receive except channels
         if the_type == "channel":
             glovar.except_ids["channels"].discard(the_id)
-            save("except_ids")
+
+        save("except_ids")
 
         return True
     except Exception as e:
