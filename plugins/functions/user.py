@@ -21,7 +21,7 @@ import logging
 from telegram import Bot, Message
 
 from .. import glovar
-from .etc import crypt_str, get_full_name, get_now, thread
+from .etc import crypt_str, get_forward_name, get_full_name, get_now, thread
 from .channel import ask_for_help, declare_message, forward_evidence, send_debug, share_bad_user
 from .channel import share_watch_user, update_score
 from .file import save
@@ -102,7 +102,9 @@ def terminate_user(client: Bot, message: Message) -> bool:
         gid = message.chat.id
         uid = message.from_user.id
         mid = message.message_id
-        if is_regex_text("wb", get_full_name(message.from_user)):
+        full_name = get_full_name(message.from_user)
+        forward_name = get_forward_name(message.from_user)
+        if is_regex_text("wb", full_name) or is_regex_text("wb", forward_name):
             result = forward_evidence(client, message, "自动封禁", "用户昵称")
             if result:
                 add_bad_user(client, uid)
