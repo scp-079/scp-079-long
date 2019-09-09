@@ -103,7 +103,7 @@ def terminate_user(client: Bot, message: Message) -> bool:
         uid = message.from_user.id
         mid = message.message_id
         full_name = get_full_name(message.from_user)
-        forward_name = get_forward_name(message.from_user)
+        forward_name = get_forward_name(message)
         if is_regex_text("wb", full_name) or is_regex_text("wb", forward_name):
             result = forward_evidence(client, message, "自动封禁", "用户昵称")
             if result:
