@@ -121,6 +121,7 @@ prefix: List[str] = []
 prefix_str: str = "/!"
 
 # [bots]
+avatar_id: int = 0
 captcha_id: int = 0
 clean_id: int = 0
 lang_id: int = 0
@@ -164,6 +165,7 @@ try:
     bot_token = config["basic"].get("bot_token", bot_token)
     prefix = list(config["basic"].get("prefix", prefix_str))
     # [bots]
+    avatar_id = int(config["bots"].get("avatar_id", avatar_id))
     captcha_id = int(config["bots"].get("captcha_id", captcha_id))
     clean_id = int(config["bots"].get("clean_id", clean_id))
     lang_id = int(config["bots"].get("lang_id", lang_id))
@@ -202,6 +204,7 @@ if (enabled not in {"False", "True"}
         or port == ""
         or bot_token in {"", "[DATA EXPUNGED]"}
         or prefix == []
+        or avatar_id == 0
         or captcha_id == 0
         or clean_id == 0
         or lang_id == 0
@@ -238,7 +241,7 @@ if enabled:
 else:
     request_kwargs = None
 
-bot_ids: Set[int] = {captcha_id, clean_id, lang_id, long_id,
+bot_ids: Set[int] = {avatar_id, captcha_id, clean_id, lang_id, long_id,
                      noflood_id, noporn_id, nospam_id, recheck_id, tip_id, user_id, warn_id}
 
 # Load data from pickle
