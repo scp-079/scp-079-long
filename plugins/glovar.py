@@ -81,13 +81,13 @@ locks: Dict[str, Lock] = {
 
 receivers: Dict[str, List[str]] = {
     "bad": ["ANALYZE", "APPEAL", "AVATAR", "CAPTCHA", "CLEAN", "LANG", "LONG",
-            "NOFLOOD", "NOPORN", "NOSPAM", "MANAGE", "RECHECK", "USER", "WATCH"],
+            "MANAGE", "NOFLOOD", "NOPORN", "NOSPAM", "RECHECK", "USER", "WATCH"],
     "declare": ["ANALYZE", "AVATAR", "CLEAN", "LANG", "LONG",
                 "NOFLOOD", "NOPORN", "NOSPAM", "RECHECK", "USER", "WATCH"],
     "score": ["ANALYZE", "CAPTCHA", "CLEAN", "LANG", "LONG",
-              "NOFLOOD", "NOPORN", "NOSPAM", "MANAGE", "RECHECK"],
+              "MANAGE", "NOFLOOD", "NOPORN", "NOSPAM", "RECHECK"],
     "watch": ["ANALYZE", "CAPTCHA", "CLEAN", "LANG", "LONG",
-              "NOFLOOD", "NOPORN", "NOSPAM", "MANAGE", "RECHECK", "WATCH"]
+              "MANAGE", "NOFLOOD", "NOPORN", "NOSPAM", "RECHECK", "WATCH"]
 }
 
 recorded_ids: Dict[int, Set[int]] = {}
