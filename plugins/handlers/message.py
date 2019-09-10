@@ -261,7 +261,7 @@ def process_data(update: Update, context: CallbackContext) -> bool:
                         elif action_type == "watch":
                             receive_remove_watch(data)
 
-                    elif action_type == "update":
+                    elif action == "update":
                         if action_type == "refresh":
                             receive_refresh(client, data)
 
