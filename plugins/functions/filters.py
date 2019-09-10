@@ -261,6 +261,23 @@ def is_declared_message(message: Message) -> bool:
     return False
 
 
+def is_delete_text(text: str) -> bool:
+    # Check if the text is delete text
+    try:
+        if is_regex_text("del", text):
+            return True
+
+        if is_regex_text("spc", text):
+            return True
+
+        if is_regex_text("spe", text):
+            return True
+    except Exception as e:
+        logger.warning(f"Is delete text error: {e}", exc_info=True)
+
+    return False
+
+
 def is_detected_user(message: Message) -> bool:
     # Check if the message is sent by a detected user
     try:
@@ -319,7 +336,10 @@ def is_long_text(message: Message) -> bool:
                 # Work with NOSPAM
                 if length <= 10000:
                     if glovar.nospam_id in glovar.admin_ids[gid]:
-                        if is_ban_text(text or get_text(message)):
+                        if is_ban_text(text):
+                            return False
+
+                        if is_delete_text(text):
                             return False
 
                 return True
