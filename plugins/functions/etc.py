@@ -244,6 +244,9 @@ def get_text(message: Message) -> str:
         the_text = message.text or message.caption
         if the_text:
             text += the_text
+
+        if text:
+            text = t2s(text)
     except Exception as e:
         logger.warning(f"Get text error: {e}", exc_info=True)
 
