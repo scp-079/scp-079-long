@@ -23,7 +23,7 @@ from telegram.ext import CallbackContext, Dispatcher, Filters, MessageHandler
 
 from .. import glovar
 from ..functions.channel import get_debug_text
-from ..functions.etc import code, thread, user_mention
+from ..functions.etc import code, general_link, thread, user_mention
 from ..functions.file import save
 from ..functions.filters import class_c, class_d, class_e, declared_message, exchange_channel, from_user, hide_channel
 from ..functions.filters import is_declared_message, is_long_text, new_group, test_group
@@ -105,9 +105,10 @@ def check(update: Update, context: CallbackContext) -> bool:
     return False
 
 
-def exchange_emergency(update: Update, _: CallbackContext) -> bool:
+def exchange_emergency(update: Update, context: CallbackContext) -> bool:
     # Sent emergency channel transfer request
     try:
+        client = context.bot
         message = update.effective_message
 
         # Read basic information
@@ -125,6 +126,11 @@ def exchange_emergency(update: Update, _: CallbackContext) -> bool:
                             glovar.should_hide = data
                         elif data is False and sender == "MANAGE":
                             glovar.should_hide = data
+
+                        text = (f"项目编号：{general_link(glovar.project_name, glovar.project_link)}\n"
+                                f"执行操作：{code('频道转移')}\n"
+                                f"应急频道：{code((lambda x: '启用' if x else '禁用')(glovar.should_hide))}\n")
+                        thread(send_message, (client, glovar.debug_channel_id, text))
 
         return True
     except Exception as e:
