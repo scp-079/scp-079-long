@@ -7,7 +7,7 @@ future==0.17.1
 OpenCC==0.2
 pyAesCrypt==0.4.3
 pycparser==2.19
-PySocks==1.7.1
+PySocks==1.7.0
 python-telegram-bot==12.1.1
 pytz==2019.2
 six==1.12.0
