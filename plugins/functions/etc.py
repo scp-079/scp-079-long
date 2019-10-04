@@ -29,6 +29,8 @@ from cryptography.fernet import Fernet
 from opencc import convert
 from telegram import Message, User
 
+from .. import glovar
+
 # Enable logging
 logger = logging.getLogger(__name__)
 
@@ -181,6 +183,25 @@ def get_command_type(message: Message) -> str:
     return result
 
 
+def get_config_text(config: dict) -> str:
+    # Get config text
+    result = ""
+    try:
+        # Basic
+        default_text = (lambda x: lang("default") if x else lang("custom"))(config.get("default"))
+        delete_text = (lambda x: lang("enabled") if x else lang("disabled"))(config.get("delete"))
+        result += (f"{lang('action')}{lang('colon')}{code(lang('config_show'))}\n"
+                   f"{lang('config')}{lang('colon')}{code(default_text)}\n"
+                   f"{lang('delete')}{lang('colon')}{code(delete_text)}\n")
+
+        # Limit
+        result += f"{lang('long_limit')}{lang('colon')}{code(config['limit'])}\n"
+    except Exception as e:
+        logger.warning(f"Get config text error: {e}", exc_info=True)
+
+    return result
+
+
 def get_forward_name(message: Message) -> str:
     # Get forwarded message's origin sender's name
     text = ""
@@ -241,6 +262,9 @@ def get_text(message: Message) -> str:
     # Get message's text
     text = ""
     try:
+        if not message:
+            return ""
+
         the_text = message.text or message.caption
         if the_text:
             text += the_text
@@ -251,6 +275,17 @@ def get_text(message: Message) -> str:
         logger.warning(f"Get text error: {e}", exc_info=True)
 
     return text
+
+
+def lang(text: str) -> str:
+    # Get the text
+    result = ""
+    try:
+        result = glovar.lang.get(text, text)
+    except Exception as e:
+        logger.warning(f"Lang error: {e}", exc_info=True)
+
+    return result
 
 
 def message_link(message: Message) -> str:

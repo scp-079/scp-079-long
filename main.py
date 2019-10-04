@@ -33,30 +33,31 @@ from plugins.handlers.message import add_message_handlers
 # Enable logging
 logger = logging.getLogger(__name__)
 
-# Create the EventHandler
+# Config updater
 updater = Updater(
     token=glovar.bot_token,
     request_kwargs=glovar.request_kwargs,
     use_context=True
 )
+updater.start_polling()
 
 # Register handlers
 add_command_handlers(updater.dispatcher)
 add_message_handlers(updater.dispatcher)
 add_error_handlers(updater.dispatcher)
 
+# Send online status
+update_status(updater.bot, "online")
+
 # Timer
 scheduler = BackgroundScheduler()
 scheduler.add_job(interval_min_10, "interval", minutes=10)
-scheduler.add_job(update_status, "cron", [updater.bot], minute=30)
+scheduler.add_job(update_status, "cron", [updater.bot, "awake"], minute=30)
 scheduler.add_job(backup_files, "cron", [updater.bot], hour=20)
 scheduler.add_job(send_count, "cron", [updater.bot], hour=21)
-scheduler.add_job(reset_data, "cron", day=glovar.reset_day, hour=22)
+scheduler.add_job(reset_data, "cron", [updater.bot], day=glovar.date_reset, hour=22)
 scheduler.add_job(update_admins, "cron", [updater.bot], hour=22, minute=30)
 scheduler.start()
-
-# Start the Bot
-updater.start_polling()
 
 # Run the bot until press Ctrl-C or the process receives SIGINT, SIGTERM or SIGABRT
 updater.idle()

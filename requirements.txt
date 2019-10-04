@@ -1,13 +1,13 @@
 APScheduler==3.6.1
-asn1crypto==0.24.0
-certifi==2019.6.16
+asn1crypto==1.0.0
+certifi==2019.9.11
 cffi==1.12.3
 cryptography==2.7
 future==0.17.1
 OpenCC==0.2
 pyAesCrypt==0.4.3
 pycparser==2.19
-PySocks==1.7.0
+PySocks==1.7.1
 python-telegram-bot==12.1.1
 pytz==2019.2
 six==1.12.0

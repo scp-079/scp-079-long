@@ -148,12 +148,11 @@ class FilterNewGroup(BaseFilter):
     # Check if the bot joined a new group
     def filter(self, message: Message):
         try:
-            if message.new_chat_members:
-                new_users = message.new_chat_members
-                if new_users:
-                    for user in new_users:
-                        if user.id == glovar.long_id:
-                            return True
+            new_users = message.new_chat_members
+            if new_users:
+                for user in new_users:
+                    if user.id == glovar.long_id:
+                        return True
             elif message.group_chat_created or message.supergroup_chat_created:
                 return True
         except Exception as e:
@@ -201,7 +200,7 @@ def is_ban_text(text: str) -> bool:
         if is_regex_text("ban", text):
             return True
 
-        if is_regex_text("ad", text) and is_regex_text("con", text):
+        if is_regex_text("ad", text) and (is_regex_text("con", text) or is_regex_text("iml", text)):
             return True
     except Exception as e:
         logger.warning(f"Is ban text error: {e}", exc_info=True)
@@ -261,23 +260,6 @@ def is_declared_message(message: Message) -> bool:
     return False
 
 
-def is_delete_text(text: str) -> bool:
-    # Check if the text is delete text
-    try:
-        if is_regex_text("del", text):
-            return True
-
-        if is_regex_text("spc", text):
-            return True
-
-        if is_regex_text("spe", text):
-            return True
-    except Exception as e:
-        logger.warning(f"Is delete text error: {e}", exc_info=True)
-
-    return False
-
-
 def is_detected_user(message: Message) -> bool:
     # Check if the message is sent by a detected user
     try:
@@ -298,7 +280,7 @@ def is_detected_user_id(gid: int, uid: int) -> bool:
         if user:
             status = user["detected"].get(gid, 0)
             now = get_now()
-            if now - status < glovar.punish_time:
+            if now - status < glovar.time_punish:
                 return True
     except Exception as e:
         logger.warning(f"Is detected user id error: {e}", exc_info=True)
@@ -322,27 +304,29 @@ def is_high_score_user(message: Message) -> Union[bool, float]:
     return False
 
 
-def is_long_text(message: Message) -> bool:
+def is_long_text(message: Message) -> int:
     # Check if the text is super long
     try:
         text = get_text(message)
-        if text:
-            if is_detected_user(message):
-                return True
+        if not text.strip():
+            return 0
 
-            gid = message.chat.id
-            length = len(text.encode())
-            if length >= glovar.configs[gid]["limit"]:
-                # Work with NOSPAM
-                if length <= 10000:
-                    if glovar.nospam_id in glovar.admin_ids[gid]:
-                        if is_ban_text(text):
-                            return False
+        if is_detected_user(message):
+            return 79
 
-                        if is_delete_text(text):
-                            return False
+        gid = message.chat.id
+        length = len(text.encode())
+        if length >= glovar.configs[gid]["limit"]:
+            # Work with NOSPAM
+            if length <= 10000:
+                if glovar.nospam_id in glovar.admin_ids[gid]:
+                    if is_ban_text(text):
+                        return 0
 
-                return True
+                    if is_regex_text("del", text):
+                        return 0
+
+            return length
     except Exception as e:
         logger.warning(f"Is long text error: {e}", exc_info=True)
 

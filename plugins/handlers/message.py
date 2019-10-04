@@ -23,17 +23,17 @@ from telegram.ext import CallbackContext, Dispatcher, Filters, MessageHandler
 
 from .. import glovar
 from ..functions.channel import get_debug_text
-from ..functions.etc import code, general_link, thread, user_mention
+from ..functions.etc import code, general_link, lang, thread, user_mention
 from ..functions.file import save
-from ..functions.filters import class_c, class_d, class_e, declared_message, exchange_channel, from_user, hide_channel
+from ..functions.filters import class_c, class_d, declared_message, exchange_channel, from_user, hide_channel
 from ..functions.filters import is_declared_message, is_long_text, new_group, test_group
 from ..functions.group import leave_group
 from ..functions.ids import init_group_id
-from ..functions.receive import receive_add_bad, receive_add_except, receive_config_commit, receive_config_reply
-from ..functions.receive import receive_declared_message, receive_leave_approve
-from ..functions.receive import receive_refresh, receive_regex, receive_remove_bad, receive_remove_except
-from ..functions.receive import receive_remove_score, receive_remove_watch, receive_text_data
-from ..functions.receive import receive_user_score, receive_watch_user
+from ..functions.receive import receive_add_bad, receive_add_except, receive_clear_data, receive_config_commit
+from ..functions.receive import receive_config_reply, receive_config_show, receive_declared_message
+from ..functions.receive import receive_leave_approve, receive_refresh, receive_regex, receive_remove_bad
+from ..functions.receive import receive_remove_except, receive_remove_score, receive_remove_watch, receive_rollback
+from ..functions.receive import receive_text_data, receive_user_score, receive_watch_user
 from ..functions.telegram import get_admins, send_message
 from ..functions.tests import long_test
 from ..functions.timers import send_count
@@ -49,7 +49,7 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
         # Check
         dispatcher.add_handler(MessageHandler(
             filters=(Filters.update.messages & Filters.group & ~test_group & from_user & ~Filters.status_update
-                     & ~class_c & ~class_d & ~class_e & ~declared_message),
+                     & ~class_c & ~class_d & ~declared_message),
             callback=check
         ))
         # Exchange emergency
@@ -83,24 +83,25 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
 
 def check(update: Update, context: CallbackContext) -> bool:
     # Check the messages sent from groups
-    if glovar.locks["message"].acquire():
-        try:
-            client = context.bot
-            message = update.effective_message
+    glovar.locks["message"].acquire()
+    try:
+        client = context.bot
+        message = update.effective_message
 
-            # Check declare status
-            if is_declared_message(message):
-                return True
-
-            # Super long message
-            if is_long_text(message):
-                return terminate_user(client, message)
-
+        # Check declare status
+        if is_declared_message(message):
             return True
-        except Exception as e:
-            logger.warning(f"Check error: {e}", exc_info=True)
-        finally:
-            glovar.locks["message"].release()
+
+        # Super long message
+        detection = is_long_text(message)
+        if detection:
+            return terminate_user(client, message, detection)
+
+        return True
+    except Exception as e:
+        logger.warning(f"Check error: {e}", exc_info=True)
+    finally:
+        glovar.locks["message"].release()
 
     return False
 
@@ -113,24 +114,28 @@ def exchange_emergency(update: Update, context: CallbackContext) -> bool:
 
         # Read basic information
         data = receive_text_data(message)
-        if data:
-            sender = data["from"]
-            receivers = data["to"]
-            action = data["action"]
-            action_type = data["type"]
-            data = data["data"]
-            if "EMERGENCY" in receivers:
-                if action == "backup":
-                    if action_type == "hide":
-                        if data is True:
-                            glovar.should_hide = data
-                        elif data is False and sender == "MANAGE":
-                            glovar.should_hide = data
+        if not data:
+            return True
 
-                        text = (f"项目编号：{general_link(glovar.project_name, glovar.project_link)}\n"
-                                f"执行操作：{code('频道转移')}\n"
-                                f"应急频道：{code((lambda x: '启用' if x else '禁用')(glovar.should_hide))}\n")
-                        thread(send_message, (client, glovar.debug_channel_id, text))
+        sender = data["from"]
+        receivers = data["to"]
+        action = data["action"]
+        action_type = data["type"]
+        data = data["data"]
+        if "EMERGENCY" in receivers:
+            if action == "backup":
+                if action_type == "hide":
+                    if data is True:
+                        glovar.should_hide = data
+                    elif data is False and sender == "MANAGE":
+                        glovar.should_hide = data
+
+                    project_text = general_link(glovar.project_name, glovar.project_link)
+                    hide_text = (lambda x: lang("enabled") if x else "disabled")(glovar.should_hide)
+                    text = (f"{lang('project')}{lang('colon')}{project_text}\n"
+                            f"{lang('action')}{lang('colon')}{code(lang('transfer_channel'))}\n"
+                            f"{lang('emergency_channel')}{lang('colon')}{code(hide_text)}\n")
+                    thread(send_message, (client, glovar.debug_channel_id, text))
 
         return True
     except Exception as e:
@@ -161,22 +166,22 @@ def init_group(update: Update, context: CallbackContext) -> bool:
                     glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
                                              if not admin.user.is_bot}
                     save("admin_ids")
-                    text += f"状态：{code('已加入群组')}\n"
+                    text += f"{lang('status')}{lang('colon')}{code(lang('status_joined'))}\n"
                 else:
                     thread(leave_group, (client, gid))
-                    text += (f"状态：{code('已退出群组')}\n"
-                             f"原因：{code('获取管理员列表失败')}\n")
+                    text += (f"{lang('status')}{lang('colon')}{code(lang('status_left'))}\n"
+                             f"{lang('reason')}{lang('colon')}{code(lang('reason_admin'))}\n")
         else:
             if gid in glovar.left_group_ids:
                 return leave_group(client, gid)
 
             leave_group(client, gid)
-            text += (f"状态：{code('已退出群组')}\n"
-                     f"原因：{code('未授权使用')}\n")
+            text += (f"{lang('status')}{lang('colon')}{code(lang('status_left'))}\n"
+                     f"{lang('reason')}{lang('colon')}{code(lang('reason_unauthorized'))}\n")
             if message.from_user.username:
-                text += f"邀请人：{user_mention(invited_by)}\n"
+                text += f"{lang('inviter')}{lang('colon')}{user_mention(invited_by)}\n"
             else:
-                text += f"邀请人：{code(invited_by)}\n"
+                text += f"{lang('inviter')}{lang('colon')}{code(invited_by)}\n"
 
         thread(send_message, (client, glovar.debug_channel_id, text))
 
@@ -255,6 +260,17 @@ def process_data(update: Update, context: CallbackContext) -> bool:
                             receive_add_bad(sender, data)
                         elif action_type == "except":
                             receive_add_except(client, data)
+
+                    elif action == "backup":
+                        if action_type == "rollback":
+                            receive_rollback(client, message, data)
+
+                    elif action == "clear":
+                        receive_clear_data(client, action_type, data)
+
+                    elif action == "config":
+                        if action_type == "show":
+                            receive_config_show(client, data)
 
                     elif action == "leave":
                         if action_type == "approve":
@@ -366,17 +382,17 @@ def process_data(update: Update, context: CallbackContext) -> bool:
 
 def test(update: Update, context: CallbackContext) -> bool:
     # Show test results in TEST group
-    if glovar.locks["test"].acquire():
-        try:
-            client = context.bot
-            message = update.effective_message
+    glovar.locks["test"].acquire()
+    try:
+        client = context.bot
+        message = update.effective_message
 
-            long_test(client, message)
+        long_test(client, message)
 
-            return True
-        except Exception as e:
-            logger.warning(f"Test error: {e}", exc_info=True)
-        finally:
-            glovar.locks["test"].release()
+        return True
+    except Exception as e:
+        logger.warning(f"Test error: {e}", exc_info=True)
+    finally:
+        glovar.locks["test"].release()
 
     return False

@@ -34,6 +34,251 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Read data from config.ini
+
+# [proxy]
+enabled: Union[bool, str] = ""
+hostname: str = ""
+port: str = ""
+
+# [basic]
+bot_token: str = ""
+prefix: List[str] = []
+prefix_str: str = "/!"
+
+# [bots]
+avatar_id: int = 0
+captcha_id: int = 0
+clean_id: int = 0
+lang_id: int = 0
+long_id: int = 0
+noflood_id: int = 0
+noporn_id: int = 0
+nospam_id: int = 0
+recheck_id: int = 0
+tip_id: int = 0
+user_id: int = 0
+warn_id: int = 0
+
+# [channels]
+critical_channel_id: int = 0
+debug_channel_id: int = 0
+exchange_channel_id: int = 0
+hide_channel_id: int = 0
+logging_channel_id: int = 0
+test_group_id: int = 0
+
+# [custom]
+backup: Union[str, bool] = ""
+date_reset: str = ""
+default_group_link: str = ""
+project_link: str = ""
+project_name: str = ""
+time_ban: int = 0
+time_punish: int = 0
+zh_cn: Union[str, bool] = ""
+
+# [encrypt]
+key: Union[str, bytes] = ""
+password: str = ""
+
+try:
+    config = RawConfigParser()
+    config.read("config.ini")
+    # [proxy]
+    enabled = config["proxy"].get("enabled", enabled)
+    hostname = config["proxy"].get("hostname", hostname)
+    port = config["proxy"].get("port", port)
+    # [basic]
+    bot_token = config["basic"].get("bot_token", bot_token)
+    prefix = list(config["basic"].get("prefix", prefix_str))
+    # [bots]
+    avatar_id = int(config["bots"].get("avatar_id", avatar_id))
+    captcha_id = int(config["bots"].get("captcha_id", captcha_id))
+    clean_id = int(config["bots"].get("clean_id", clean_id))
+    lang_id = int(config["bots"].get("lang_id", lang_id))
+    long_id = int(config["bots"].get("long_id", long_id))
+    noflood_id = int(config["bots"].get("noflood_id", noflood_id))
+    noporn_id = int(config["bots"].get("noporn_id", noporn_id))
+    nospam_id = int(config["bots"].get("nospam_id", nospam_id))
+    recheck_id = int(config["bots"].get("recheck_id", recheck_id))
+    tip_id = int(config["bots"].get("tip_id", tip_id))
+    user_id = int(config["bots"].get("user_id", user_id))
+    warn_id = int(config["bots"].get("warn_id", warn_id))
+    # [channels]
+    critical_channel_id = int(config["channels"].get("critical_channel_id", critical_channel_id))
+    debug_channel_id = int(config["channels"].get("debug_channel_id", debug_channel_id))
+    exchange_channel_id = int(config["channels"].get("exchange_channel_id", exchange_channel_id))
+    hide_channel_id = int(config["channels"].get("hide_channel_id", hide_channel_id))
+    logging_channel_id = int(config["channels"].get("logging_channel_id", logging_channel_id))
+    test_group_id = int(config["channels"].get("test_group_id", test_group_id))
+    # [custom]
+    backup = config["custom"].get("backup", backup)
+    backup = eval(backup)
+    date_reset = config["custom"].get("date_reset", date_reset)
+    default_group_link = config["custom"].get("default_group_link", default_group_link)
+    project_link = config["custom"].get("project_link", project_link)
+    project_name = config["custom"].get("project_name", project_name)
+    time_ban = int(config["custom"].get("time_ban", time_ban))
+    time_punish = int(config["custom"].get("time_punish", time_punish))
+    zh_cn = config["custom"].get("zh_cn", zh_cn)
+    zh_cn = eval(zh_cn)
+    # [encrypt]
+    key = config["encrypt"].get("key", key)
+    key = key.encode("utf-8")
+    password = config["encrypt"].get("password", password)
+except Exception as e:
+    logger.warning(f"Read data from config.ini error: {e}", exc_info=True)
+
+# Check
+if (enabled not in {"False", "True"}
+        or hostname == ""
+        or port == ""
+        or bot_token in {"", "[DATA EXPUNGED]"}
+        or prefix == []
+        or avatar_id == 0
+        or captcha_id == 0
+        or clean_id == 0
+        or lang_id == 0
+        or long_id == 0
+        or noflood_id == 0
+        or noporn_id == 0
+        or nospam_id == 0
+        or recheck_id == 0
+        or tip_id == 0
+        or user_id == 0
+        or warn_id == 0
+        or critical_channel_id == 0
+        or debug_channel_id == 0
+        or exchange_channel_id == 0
+        or hide_channel_id == 0
+        or logging_channel_id == 0
+        or test_group_id == 0
+        or backup not in {False, True}
+        or date_reset in {"", "[DATA EXPUNGED]"}
+        or default_group_link in {"", "[DATA EXPUNGED]"}
+        or project_link in {"", "[DATA EXPUNGED]"}
+        or project_name in {"", "[DATA EXPUNGED]"}
+        or time_ban == 0
+        or time_punish == 0
+        or zh_cn not in {False, True}
+        or key in {b"", b"[DATA EXPUNGED]", "", "[DATA EXPUNGED]"}
+        or password in {"", "[DATA EXPUNGED]"}):
+    logger.critical("No proper settings")
+    raise SystemExit("No proper settings")
+
+enabled = eval(enabled)
+if enabled:
+    request_kwargs = {
+        "proxy_url": f"socks5h://{hostname}:{port}/"
+    }
+else:
+    request_kwargs = None
+
+bot_ids: Set[int] = {avatar_id, captcha_id, clean_id, lang_id, long_id, noflood_id,
+                     noporn_id, nospam_id, recheck_id, tip_id, user_id, warn_id}
+
+# Languages
+lang: Dict[str, str] = {
+    # Admin
+    "admin": (zh_cn and "管理员") or "Admin",
+    "admin_group": (zh_cn and "群管理") or "Group Admin",
+    "admin_project": (zh_cn and "项目管理员") or "Project Admin",
+    # Basic
+    "colon": (zh_cn and "：") or ": ",
+    "score": (zh_cn and "评分") or "Score",
+    "name": (zh_cn and "名称") or "Name",
+    "action": (zh_cn and "执行操作") or "Action",
+    "enabled": (zh_cn and "启用") or "Enabled",
+    "disabled": (zh_cn and "禁用") or "Disabled",
+    "clear": (zh_cn and "清空数据") or "Clear Data",
+    "description": (zh_cn and "说明") or "Description",
+    "reason": (zh_cn and "原因") or "Reason",
+    "rollback": (zh_cn and "数据回滚") or "Rollback",
+    "custom_group": (zh_cn and "群组自定义") or "Group Custom",
+    "reset": (zh_cn and "重置数据") or "Reset Data",
+    "version": (zh_cn and "版本") or "Version",
+    # Config
+    "default": (zh_cn and "默认") or "Default",
+    "custom": (zh_cn and "自定义") or "Custom",
+    "config_show": (zh_cn and "查看设置") or "Show Config",
+    "config": (zh_cn and "设置") or "Settings",
+    "delete": (zh_cn and "协助删除") or "Help Delete",
+    "long_limit": (zh_cn and "消息字节上限") or "Bytes Length Limit",
+    "config_change": (zh_cn and "更改设置") or "Change Config",
+    "config_button": (zh_cn and "请点击下方按钮进行设置") or "Press the Button to Config",
+    "config_go": (zh_cn and "前往设置") or "Go to Config",
+    "config_create": (zh_cn and "创建设置会话") or "Create Config Session",
+    "config_updated": (zh_cn and "已更新") or "Updated",
+    # Command
+    "command_para": (zh_cn and "命令参数有误") or "Incorrect Command Parameter",
+    "command_type": (zh_cn and "命令类别有误") or "Incorrect Command Type",
+    "command_lack": (zh_cn and "命令参数缺失") or "Lack of Parameter",
+    "config_locked": (zh_cn and "设置当前被锁定") or "Config is Locked",
+    "command_usage": (zh_cn and "用法有误") or "Incorrect Usage",
+    # Debug
+    "triggered_by": (zh_cn and "触发消息") or "Triggered By",
+    # Emergency
+    "issue": (zh_cn and "发现状况") or "Issue",
+    "exchange_invalid": (zh_cn and "数据交换频道失效") or "Exchange Channel Invalid",
+    "auto_fix": (zh_cn and "自动处理") or "Auto Fix",
+    "protocol_1": (zh_cn and "启动 1 号协议") or "Initiate Protocol 1",
+    "transfer_channel": (zh_cn and "频道转移") or "Transfer Channel",
+    "emergency_channel": (zh_cn and "应急频道") or "Emergency Channel",
+    # Group
+    "group_name": (zh_cn and "群组名称") or "Group Name",
+    "group_id": (zh_cn and "群组 ID") or "Group ID",
+    "reason_permissions": (zh_cn and "权限缺失") or "Missing Permissions",
+    "reason_user": (zh_cn and "缺失 USER") or "Missing USER",
+    "leave_approve": (zh_cn and "已批准退出群组") or "Approve to Leave the Group",
+    "refresh": (zh_cn and "刷新群管列表") or "Refresh Admin Lists",
+    "leave_auto": (zh_cn and "自动退出并清空数据") or "Leave automatically",
+    "reason_leave": (zh_cn and "非管理员或已不在群组中") or "Not Admin in Group",
+    "status_joined": (zh_cn and "已加入群组") or "Joined the Group",
+    "status_left": (zh_cn and "已退出群组") or "Left the Group",
+    "reason_admin": (zh_cn and "获取管理员列表失败") or "Failed to Fetch Admin List",
+    "reason_unauthorized": (zh_cn and "未授权使用") or "Unauthorized",
+    "inviter": (zh_cn and "邀请人") or "Inviter",
+    # More
+    "privacy": (zh_cn and "可能涉及隐私而未转发") or "Not Forwarded Due to Privacy Reason",
+    "cannot_forward": (zh_cn and "此类消息无法转发至频道") or "The Message Cannot be Forwarded to Channel",
+    # Message Types
+    "gam": (zh_cn and "游戏") or "Game",
+    "ser": (zh_cn and "服务消息") or "Service",
+    # Record
+    "project": (zh_cn and "项目编号") or "Project",
+    "project_origin": (zh_cn and "原始项目") or "Original Project",
+    "status": (zh_cn and "状态") or "Status",
+    "user_id": (zh_cn and "用户 ID") or "User ID",
+    "level": (zh_cn and "操作等级") or "Level",
+    "rule": (zh_cn and "规则") or "Rule",
+    "message_type": (zh_cn and "消息类别") or "Message Type",
+    "message_game": (zh_cn and "游戏标识") or "Game Short Name",
+    "message_lang": (zh_cn and "消息语言") or "Message Language",
+    "message_len": (zh_cn and "消息长度") or "Message Length",
+    "message_freq": (zh_cn and "消息频率") or "Message Frequency",
+    "user_score": (zh_cn and "用户得分") or "User Score",
+    "user_bio": (zh_cn and "用户简介") or "User Bio",
+    "user_name": (zh_cn and "用户昵称") or "User Name",
+    "from_name": (zh_cn and "来源名称") or "Forward Name",
+    "more": (zh_cn and "附加信息") or "Extra Info",
+    # Terminate
+    "auto_ban": (zh_cn and "自动封禁") or "Auto Ban",
+    "name_examine": (zh_cn and "名称检查") or "Name Examination",
+    "name_ban": (zh_cn and "名称封禁") or "Ban by Name",
+    "watch_user": (zh_cn and "敏感追踪") or "Watched User",
+    "watch_ban": (zh_cn and "追踪封禁") or "Watch Ban",
+    "score_user": (zh_cn and "用户评分") or "High Score",
+    "score_ban": (zh_cn and "评分封禁") or "Ban by Score",
+    "auto_delete": (zh_cn and "自动删除") or "Auto Delete",
+    "watch_delete": (zh_cn and "追踪删除") or "Watch Delete",
+    # Test
+    "message_length": (zh_cn and "消息字节长度") or "Message's Bytes Length",
+    # Unit
+    "members": (zh_cn and "名") or "member(s)",
+    "messages": (zh_cn and "条") or "message(s)"
+}
+
 # Init
 
 all_commands: List[str] = [
@@ -52,6 +297,7 @@ declared_message_ids: Dict[int, Set[int]] = {}
 default_config: Dict[str, Union[bool, int]] = {
     "default": True,
     "lock": 0,
+    "delete": True,
     "limit": 9000
 }
 
@@ -100,6 +346,7 @@ regex: Dict[str, bool] = {
     "ban": False,
     "con": False,
     "del": False,
+    "iml": False,
     "spc": False,
     "spe": False,
     "wb": True
@@ -109,143 +356,7 @@ sender: str = "LONG"
 
 should_hide: bool = False
 
-version: str = "0.0.4"
-
-# Read data from config.ini
-
-# [proxy]
-enabled: Union[bool, str] = ""
-hostname: str = ""
-port: str = ""
-
-# [basic]
-bot_token: str = ""
-prefix: List[str] = []
-prefix_str: str = "/!"
-
-# [bots]
-avatar_id: int = 0
-captcha_id: int = 0
-clean_id: int = 0
-lang_id: int = 0
-long_id: int = 0
-noflood_id: int = 0
-noporn_id: int = 0
-nospam_id: int = 0
-recheck_id: int = 0
-tip_id: int = 0
-user_id: int = 0
-warn_id: int = 0
-
-# [channels]
-critical_channel_id: int = 0
-debug_channel_id: int = 0
-exchange_channel_id: int = 0
-hide_channel_id: int = 0
-logging_channel_id: int = 0
-test_group_id: int = 0
-
-# [custom]
-default_group_link: str = ""
-project_link: str = ""
-project_name: str = ""
-punish_time: int = 0
-reset_day: str = ""
-time_ban: int = 0
-
-# [encrypt]
-key: Union[str, bytes] = ""
-password: str = ""
-
-try:
-    config = RawConfigParser()
-    config.read("config.ini")
-    # [proxy]
-    enabled = config["proxy"].get("enabled", enabled)
-    hostname = config["proxy"].get("hostname", hostname)
-    port = config["proxy"].get("port", port)
-    # [basic]
-    bot_token = config["basic"].get("bot_token", bot_token)
-    prefix = list(config["basic"].get("prefix", prefix_str))
-    # [bots]
-    avatar_id = int(config["bots"].get("avatar_id", avatar_id))
-    captcha_id = int(config["bots"].get("captcha_id", captcha_id))
-    clean_id = int(config["bots"].get("clean_id", clean_id))
-    lang_id = int(config["bots"].get("lang_id", lang_id))
-    long_id = int(config["bots"].get("long_id", long_id))
-    noflood_id = int(config["bots"].get("noflood_id", noflood_id))
-    noporn_id = int(config["bots"].get("noporn_id", noporn_id))
-    nospam_id = int(config["bots"].get("nospam_id", nospam_id))
-    recheck_id = int(config["bots"].get("recheck_id", recheck_id))
-    tip_id = int(config["bots"].get("tip_id", tip_id))
-    user_id = int(config["bots"].get("user_id", user_id))
-    warn_id = int(config["bots"].get("warn_id", warn_id))
-    # [channels]
-    critical_channel_id = int(config["channels"].get("critical_channel_id", critical_channel_id))
-    debug_channel_id = int(config["channels"].get("debug_channel_id", debug_channel_id))
-    exchange_channel_id = int(config["channels"].get("exchange_channel_id", exchange_channel_id))
-    hide_channel_id = int(config["channels"].get("hide_channel_id", hide_channel_id))
-    logging_channel_id = int(config["channels"].get("logging_channel_id", logging_channel_id))
-    test_group_id = int(config["channels"].get("test_group_id", test_group_id))
-    # [custom]
-    default_group_link = config["custom"].get("default_group_link", default_group_link)
-    project_link = config["custom"].get("project_link", project_link)
-    project_name = config["custom"].get("project_name", project_name)
-    punish_time = int(config["custom"].get("punish_time", punish_time))
-    reset_day = config["custom"].get("reset_day", reset_day)
-    time_ban = int(config["custom"].get("time_ban", time_ban))
-    # [encrypt]
-    key = config["encrypt"].get("key", key)
-    key = key.encode("utf-8")
-    password = config["encrypt"].get("password", password)
-except Exception as e:
-    logger.warning(f"Read data from config.ini error: {e}", exc_info=True)
-
-# Check
-if (enabled not in {"False", "True"}
-        or hostname == ""
-        or port == ""
-        or bot_token in {"", "[DATA EXPUNGED]"}
-        or prefix == []
-        or avatar_id == 0
-        or captcha_id == 0
-        or clean_id == 0
-        or lang_id == 0
-        or long_id == 0
-        or noflood_id == 0
-        or noporn_id == 0
-        or nospam_id == 0
-        or recheck_id == 0
-        or tip_id == 0
-        or user_id == 0
-        or warn_id == 0
-        or critical_channel_id == 0
-        or debug_channel_id == 0
-        or exchange_channel_id == 0
-        or hide_channel_id == 0
-        or logging_channel_id == 0
-        or test_group_id == 0
-        or default_group_link in {"", "[DATA EXPUNGED]"}
-        or project_link in {"", "[DATA EXPUNGED]"}
-        or project_name in {"", "[DATA EXPUNGED]"}
-        or punish_time == 0
-        or reset_day in {"", "[DATA EXPUNGED]"}
-        or time_ban == 0
-        or key in {b"", b"[DATA EXPUNGED]"}
-        or password in {"", "[DATA EXPUNGED]"}):
-    logger.critical("No proper settings")
-    raise SystemExit("No proper settings")
-
-enabled = eval(enabled)
-if enabled:
-    request_kwargs = {
-        "proxy_url": f"socks5h://{hostname}:{port}/"
-    }
-else:
-    request_kwargs = None
-
-bot_ids: Set[int] = {avatar_id, captcha_id, clean_id, lang_id, long_id,
-                     noflood_id, noporn_id, nospam_id, recheck_id, tip_id, user_id, warn_id}
+version: str = "0.0.5"
 
 # Load data from pickle
 
@@ -322,6 +433,7 @@ configs: Dict[int, Dict[str, Union[bool, int]]] = {}
 #     -10012345678: {
 #         "default": True,
 #         "lock": 0,
+#         "delete": True,
 #         "limit": 9000
 #     }
 # }

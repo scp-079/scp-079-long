@@ -25,9 +25,9 @@ from typing import Any
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from .. import glovar
-from .channel import get_debug_text
-from .etc import code, crypt_str, general_link, get_int, get_text, thread, user_mention
-from .file import crypt_file, delete_file, get_new_path, get_downloaded_path, save
+from .channel import get_debug_text, share_data
+from .etc import code, crypt_str, general_link, get_config_text, get_int, get_text, lang, thread, user_mention
+from .file import crypt_file, data_to_file, delete_file, get_new_path, get_downloaded_path, save
 from .group import leave_group
 from .ids import init_group_id, init_user_id
 from .telegram import send_message, send_report_message
@@ -74,6 +74,48 @@ def receive_add_bad(sender: str, data: dict) -> bool:
     return False
 
 
+def receive_clear_data(client: Bot, data_type: str, data: dict) -> bool:
+    # Receive clear data command
+    try:
+        aid = data["admin_id"]
+        the_type = data["type"]
+        if data_type == "bad":
+            if the_type == "channels":
+                glovar.bad_ids["channels"] = set()
+            elif the_type == "users":
+                glovar.bad_ids["users"] = set()
+
+            save("bad_ids")
+        elif data_type == "except":
+            if the_type == "channels":
+                glovar.except_ids["channels"] = set()
+
+            save("except_ids")
+        elif data_type == "user":
+            if the_type == "all":
+                glovar.user_ids = {}
+
+            save("user_ids")
+        elif data_type == "watch":
+            if the_type == "ban":
+                glovar.watch_ids["ban"] = {}
+            elif the_type == "delete":
+                glovar.watch_ids["delete"] = {}
+
+            save("watch_ids")
+
+        # Send debug message
+        text = (f"{lang('project')}{lang('colon')}{general_link(glovar.project_name, glovar.project_link)}\n"
+                f"{lang('admin_project')}{lang('colon')}{user_mention(aid)}\n"
+                f"{lang('action')}{lang('colon')}{code(lang('clear'))}\n"
+                f"{lang('more')}{lang('colon')}{code(f'{data_type} {the_type}')}\n")
+        thread(send_message, (client, glovar.debug_channel_id, text))
+    except Exception as e:
+        logger.warning(f"Receive clear data: {e}", exc_info=True)
+
+    return False
+
+
 def receive_config_commit(data: dict) -> bool:
     # Receive config commit
     try:
@@ -95,14 +137,14 @@ def receive_config_reply(client: Bot, data: dict) -> bool:
         gid = data["group_id"]
         uid = data["user_id"]
         link = data["config_link"]
-        text = (f"管理员：{code(uid)}\n"
-                f"操作：{code('更改设置')}\n"
-                f"说明：{code('请点击下方按钮进行设置')}\n")
+        text = (f"{lang('admin')}{lang('colon')}{code(uid)}\n"
+                f"{lang('action')}{lang('colon')}{code(lang('config_change'))}\n"
+                f"{lang('description')}{lang('colon')}{code(lang('config_button'))}\n")
         markup = InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        text="前往设置",
+                        text=lang("config_go"),
                         url=link
                     )
                 ]
@@ -113,6 +155,36 @@ def receive_config_reply(client: Bot, data: dict) -> bool:
         return True
     except Exception as e:
         logger.warning(f"Receive config reply error: {e}", exc_info=True)
+
+    return False
+
+
+def receive_config_show(client: Bot, data: dict) -> bool:
+    # Receive config show request
+    try:
+        aid = data["admin_id"]
+        gid = data["group_id"]
+        if glovar.configs.get(gid, {}):
+            result = get_config_text(glovar.configs[gid])
+        else:
+            result = ""
+
+        file = data_to_file(result)
+        share_data(
+            client=client,
+            receivers=["MANAGE"],
+            action="config",
+            action_type="show",
+            data={
+                "admin_id": aid,
+                "group_id": gid
+            },
+            file=file
+        )
+
+        return True
+    except Exception as e:
+        logger.warning(f"Receive config show error: {e}", exc_info=True)
 
     return False
 
@@ -167,17 +239,15 @@ def receive_leave_approve(client: Bot, data: dict) -> bool:
         admin_id = data["admin_id"]
         the_id = data["group_id"]
         reason = data["reason"]
-        if reason == "permissions":
-            reason = "权限缺失"
-        elif reason == "user":
-            reason = "缺失 USER"
+        if reason in {"permissions", "user"}:
+            reason = lang(f"reason_{reason}")
 
         if glovar.admin_ids.get(the_id, {}):
             text = get_debug_text(client, the_id)
-            text += (f"项目管理员：{user_mention(admin_id)}\n"
-                     f"状态：{code('已批准退出该群组')}\n")
+            text += (f"{lang('admin_project')}{lang('colon')}{user_mention(admin_id)}\n"
+                     f"{lang('status')}{lang('colon')}{code(lang('leave_approve'))}\n")
             if reason:
-                text += f"原因：{code(reason)}\n"
+                text += f"{lang('reason')}{lang('colon')}{code(reason)}\n"
 
             leave_group(client, the_id)
             thread(send_message, (client, glovar.debug_channel_id, text))
@@ -194,9 +264,9 @@ def receive_refresh(client: Bot, data: int) -> bool:
     try:
         aid = data
         update_admins(client)
-        text = (f"项目编号：{general_link(glovar.project_name, glovar.project_link)}\n"
-                f"项目管理员：{user_mention(aid)}\n"
-                f"执行操作：{code('刷新群管列表')}\n")
+        text = (f"{lang('project')}{lang('colon')}{general_link(glovar.project_name, glovar.project_link)}\n"
+                f"{lang('admin_project')}{lang('colon')}{user_mention(aid)}\n"
+                f"{lang('action')}{lang('colon')}{code(lang('refresh'))}\n")
         thread(send_message, (client, glovar.debug_channel_id, text))
 
         return True
@@ -208,30 +278,30 @@ def receive_refresh(client: Bot, data: int) -> bool:
 
 def receive_regex(client: Bot, message: Message, data: str) -> bool:
     # Receive regex
-    if glovar.locks["regex"].acquire():
-        try:
-            file_name = data
-            word_type = file_name.split("_")[0]
-            if word_type not in glovar.regex:
-                return True
-
-            words_data = receive_file_data(client, message)
-            if words_data:
-                pop_set = set(eval(f"glovar.{file_name}")) - set(words_data)
-                new_set = set(words_data) - set(eval(f"glovar.{file_name}"))
-                for word in pop_set:
-                    eval(f"glovar.{file_name}").pop(word, 0)
-
-                for word in new_set:
-                    eval(f"glovar.{file_name}")[word] = 0
-
-                save(file_name)
-
+    glovar.locks["regex"].acquire()
+    try:
+        file_name = data
+        word_type = file_name.split("_")[0]
+        if word_type not in glovar.regex:
             return True
-        except Exception as e:
-            logger.warning(f"Receive regex error: {e}", exc_info=True)
-        finally:
-            glovar.locks["regex"].release()
+
+        words_data = receive_file_data(client, message)
+        if words_data:
+            pop_set = set(eval(f"glovar.{file_name}")) - set(words_data)
+            new_set = set(words_data) - set(eval(f"glovar.{file_name}"))
+            for word in pop_set:
+                eval(f"glovar.{file_name}").pop(word, 0)
+
+            for word in new_set:
+                eval(f"glovar.{file_name}")[word] = 0
+
+            save(file_name)
+
+        return True
+    except Exception as e:
+        logger.warning(f"Receive regex error: {e}", exc_info=True)
+    finally:
+        glovar.locks["regex"].release()
 
     return False
 
@@ -309,6 +379,28 @@ def receive_remove_watch(data: dict) -> bool:
         return True
     except Exception as e:
         logger.warning(f"Receive remove watch error: {e}", exc_info=True)
+
+    return False
+
+
+def receive_rollback(client: Bot, message: Message, data: dict) -> bool:
+    # Receive rollback data
+    try:
+        aid = data["admin_id"]
+        the_type = data["type"]
+        the_data = receive_file_data(client, message)
+        if the_data:
+            exec(f"glovar.{the_type} = the_data")
+            save(the_type)
+
+        # Send debug message
+        text = (f"{lang('project')}{lang('colon')}{general_link(glovar.project_name, glovar.project_link)}\n"
+                f"{lang('admin_project')}{lang('colon')}{user_mention(aid)}\n"
+                f"{lang('action')}{lang('colon')}{code(lang('rollback'))}\n"
+                f"{lang('more')}{lang('colon')}{code(the_type)}\n")
+        thread(send_message, (client, glovar.debug_channel_id, text))
+    except Exception as e:
+        logger.warning(f"Receive rollback error: {e}", exc_info=True)
 
     return False
 

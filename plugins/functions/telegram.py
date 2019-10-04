@@ -35,7 +35,7 @@ def delete_message(client: Bot, cid: int, mid: int) -> Optional[bool]:
     try:
         result = client.delete_message(chat_id=cid, message_id=mid)
     except Exception as e:
-        logger.warning(f"Delete message in {cid} error: {e}", exc_info=True)
+        logger.warning(f"Delete message {mid} in {cid} error: {e}", exc_info=True)
 
     return result
 
