@@ -174,13 +174,13 @@ def receive_config_show(client: Bot, data: dict) -> bool:
 
         # Generate report message's text
         result = (f"{lang('admin')}{lang('colon')}{user_mention(aid)}\n"
-                  f"{lang('action')}{lang('colon')}{lang('config_show')}\n"
+                  f"{lang('action')}{lang('colon')}{code(lang('config_show'))}\n"
                   f"{lang('group_id')}{lang('colon')}{code(gid)}\n")
         if glovar.configs.get(gid, {}):
             result += get_config_text(glovar.configs[gid])
         else:
-            result += (f"{lang('status')}{lang('colon')}{lang('status_failed')}\n"
-                       f"{lang('reason')}{lang('colon')}{lang('reason_none')}\n")
+            result += (f"{lang('status')}{lang('colon')}{code(lang('status_failed'))}\n"
+                       f"{lang('reason')}{lang('colon')}{code(lang('reason_none'))}\n")
 
         # Send the text data
         file = data_to_file(result)
