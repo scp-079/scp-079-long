@@ -249,8 +249,8 @@ def share_bad_user(client: Bot, uid: int) -> bool:
     return False
 
 
-def share_data(client: Bot, receivers: List[str], action: str, action_type: str, data: Union[bool, dict, int, str],
-               file: str = None, encrypt: bool = True) -> bool:
+def share_data(client: Bot, receivers: List[str], action: str, action_type: str,
+               data: Union[bool, dict, int, str] = None, file: str = None, encrypt: bool = True) -> bool:
     # Use this function to share data in the channel
     try:
         if glovar.sender in receivers:
