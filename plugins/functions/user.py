@@ -62,10 +62,9 @@ def add_detected_user(gid: int, uid: int, now: int) -> bool:
     return False
 
 
-def add_watch_user(client: Bot, the_type: str, uid: int) -> bool:
+def add_watch_user(client: Bot, the_type: str, uid: int, now: int) -> bool:
     # Add a watch ban user, share it
     try:
-        now = get_now()
         until = now + glovar.time_ban
         glovar.watch_ids[the_type][uid] = until
         until = str(until)
@@ -186,7 +185,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 length=length
             )
             if result:
-                add_watch_user(client, "ban", uid)
+                add_watch_user(client, "ban", uid, now)
                 delete_message(client, gid, mid)
                 declare_message(client, gid, mid)
                 ask_for_help(client, "delete", gid, uid, "global")
