@@ -87,6 +87,7 @@ try:
     config.read("config.ini")
     # [proxy]
     enabled = config["proxy"].get("enabled", enabled)
+    enabled = eval(enabled)
     hostname = config["proxy"].get("hostname", hostname)
     port = config["proxy"].get("port", port)
     # [basic]
@@ -131,7 +132,7 @@ except Exception as e:
     logger.warning(f"Read data from config.ini error: {e}", exc_info=True)
 
 # Check
-if (enabled not in {"False", "True"}
+if (enabled not in {False, True}
         or hostname == ""
         or port == ""
         or bot_token in {"", "[DATA EXPUNGED]"}
@@ -167,16 +168,12 @@ if (enabled not in {"False", "True"}
     logger.critical("No proper settings")
     raise SystemExit("No proper settings")
 
-enabled = eval(enabled)
 if enabled:
     request_kwargs = {
         "proxy_url": f"socks5h://{hostname}:{port}/"
     }
 else:
     request_kwargs = None
-
-bot_ids: Set[int] = {avatar_id, captcha_id, clean_id, lang_id, long_id, noflood_id,
-                     noporn_id, nospam_id, recheck_id, tip_id, user_id, warn_id}
 
 # Languages
 lang: Dict[str, str] = {
@@ -290,6 +287,9 @@ all_commands: List[str] = [
     "l"
     "version"
 ]
+
+bot_ids: Set[int] = {avatar_id, captcha_id, clean_id, lang_id, long_id, noflood_id,
+                     noporn_id, nospam_id, recheck_id, tip_id, user_id, warn_id}
 
 declared_message_ids: Dict[int, Set[int]] = {}
 # declared_message_ids = {
