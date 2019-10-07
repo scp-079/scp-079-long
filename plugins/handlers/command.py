@@ -171,7 +171,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
                                     reason = lang("command_para")
                             elif command_type == "limit":
                                 limit = get_int(command_context)
-                                if 2000 <= limit <= 10000 and limit in set(range(2000, 11000, 1000)):
+                                if 500 <= limit <= 10000 and limit in set(range(500, 10500, 500)):
                                     new_config["limit"] = limit
                                 else:
                                     success = False
