@@ -48,11 +48,11 @@ def add_bad_user(client: Bot, uid: int) -> bool:
     return False
 
 
-def add_detected_user(gid: int, uid: int) -> bool:
+def add_detected_user(gid: int, uid: int, now: int) -> bool:
     # Add or update a detected user's status
     try:
         init_user_id(uid)
-        now = get_now()
+        now = now or get_now()
         previous = glovar.user_ids[uid]["detected"].get(gid)
         glovar.user_ids[uid]["detected"][gid] = now
 
@@ -105,6 +105,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
         gid = message.chat.id
         uid = message.from_user.id
         mid = message.message_id
+        now = int(message.date.strftime("%s"))
 
         full_name = get_full_name(message.from_user)
         forward_name = get_forward_name(message)
@@ -190,7 +191,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 delete_message(client, gid, mid)
                 declare_message(client, gid, mid)
                 ask_for_help(client, "delete", gid, uid, "global")
-                previous = add_detected_user(gid, uid)
+                previous = add_detected_user(gid, uid, now)
                 not previous and update_score(client, uid)
                 send_debug(
                     client=client,
@@ -202,7 +203,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 )
         elif is_detected_user(message) or uid in glovar.recorded_ids[gid] or length == 79:
             delete_message(client, gid, mid)
-            add_detected_user(gid, uid)
+            add_detected_user(gid, uid, now)
             declare_message(client, gid, mid)
         else:
             result = forward_evidence(
@@ -216,7 +217,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 glovar.recorded_ids[gid].add(uid)
                 delete_message(client, gid, mid)
                 declare_message(client, gid, mid)
-                previous = add_detected_user(gid, uid)
+                previous = add_detected_user(gid, uid, now)
                 not previous and update_score(client, uid)
                 send_debug(
                     client=client,
