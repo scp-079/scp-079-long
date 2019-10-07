@@ -307,6 +307,10 @@ def is_high_score_user(message: Message) -> Union[bool, float]:
 def is_long_text(message: Message) -> int:
     # Check if the text is super long
     try:
+        # Basic data
+        gid = message.chat.id
+
+        # Check
         text = get_text(message)
         if not text.strip():
             return 0
@@ -314,7 +318,6 @@ def is_long_text(message: Message) -> int:
         if is_detected_user(message):
             return 79
 
-        gid = message.chat.id
         length = len(text.encode())
         if length >= glovar.configs[gid]["limit"]:
             # Work with NOSPAM
