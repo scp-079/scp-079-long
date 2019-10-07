@@ -33,7 +33,7 @@ from plugins.handlers.message import add_message_handlers
 # Enable logging
 logger = logging.getLogger(__name__)
 
-# Config updater
+# Config session
 updater = Updater(
     token=glovar.bot_token,
     request_kwargs=glovar.request_kwargs,
