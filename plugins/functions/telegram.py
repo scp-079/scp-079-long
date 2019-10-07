@@ -33,7 +33,7 @@ def delete_message(client: Bot, cid: int, mid: int) -> Optional[bool]:
     # Delete some messages
     result = None
     try:
-        if cid and mid:
+        if not cid or not mid:
             return None
 
         result = client.delete_message(chat_id=cid, message_id=mid)
