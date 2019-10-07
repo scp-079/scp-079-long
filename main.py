@@ -59,7 +59,7 @@ scheduler.add_job(reset_data, "cron", [updater.bot], day=glovar.date_reset, hour
 scheduler.add_job(update_admins, "cron", [updater.bot], hour=22, minute=30)
 scheduler.start()
 
-# Run the bot until press Ctrl-C or the process receives SIGINT, SIGTERM or SIGABRT
+# Hold
 updater.idle()
 
 # Stop
