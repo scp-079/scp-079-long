@@ -52,7 +52,6 @@ def add_detected_user(gid: int, uid: int, now: int) -> bool:
     # Add or update a detected user's status
     try:
         init_user_id(uid)
-        now = now or get_now()
         previous = glovar.user_ids[uid]["detected"].get(gid)
         glovar.user_ids[uid]["detected"][gid] = now
 
@@ -105,7 +104,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
         gid = message.chat.id
         uid = message.from_user.id
         mid = message.message_id
-        now = int(message.date.strftime("%s"))
+        now = int(message.date.strftime("%s")) or get_now()
 
         full_name = get_full_name(message.from_user)
         forward_name = get_forward_name(message)

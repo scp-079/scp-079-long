@@ -24,7 +24,7 @@ from telegram import Message
 from telegram.ext import BaseFilter
 
 from .. import glovar
-from .etc import get_now, get_text
+from .etc import get_now, get_int, get_text
 from .file import save
 from .ids import init_group_id
 
@@ -266,7 +266,7 @@ def is_detected_user(message: Message) -> bool:
         if message.from_user:
             gid = message.chat.id
             uid = message.from_user.id
-            return is_detected_user_id(gid, uid, int(message.date.strftime("%s")))
+            return is_detected_user_id(gid, uid, get_int(message.date.strftime("%s")) or get_now())
     except Exception as e:
         logger.warning(f"Is detected user error: {e}", exc_info=True)
 
@@ -279,7 +279,6 @@ def is_detected_user_id(gid: int, uid: int, now: int) -> bool:
         user = glovar.user_ids.get(uid, {})
         if user:
             status = user["detected"].get(gid, 0)
-            now = now or get_now()
             if now - status < glovar.time_punish:
                 return True
     except Exception as e:
@@ -375,7 +374,7 @@ def is_watch_user(message: Message, the_type: str) -> bool:
     try:
         if message.from_user:
             uid = message.from_user.id
-            now = get_now()
+            now = get_int(message.date.strftime("%s")) or get_now()
             until = glovar.watch_ids[the_type].get(uid, 0)
             if now < until:
                 return True
