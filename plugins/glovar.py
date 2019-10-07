@@ -272,10 +272,7 @@ lang: Dict[str, str] = {
     "watch_ban": (zh_cn and "追踪封禁") or "Watch Ban",
     "watch_delete": (zh_cn and "追踪删除") or "Watch Delete",
     # Test
-    "message_length": (zh_cn and "消息字节长度") or "Message's Bytes Length",
-    # Unit
-    "members": (zh_cn and "名") or "member(s)",
-    "messages": (zh_cn and "条") or "message(s)"
+    "message_length": (zh_cn and "消息字节长度") or "Message's Bytes Length"
 }
 
 # Init
