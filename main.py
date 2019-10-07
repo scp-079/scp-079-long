@@ -61,3 +61,6 @@ scheduler.start()
 
 # Run the bot until press Ctrl-C or the process receives SIGINT, SIGTERM or SIGABRT
 updater.idle()
+
+# Stop
+updater.stop()
