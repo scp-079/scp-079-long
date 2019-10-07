@@ -194,7 +194,7 @@ def get_config_text(config: dict) -> str:
                    f"{lang('delete')}{lang('colon')}{code(delete_text)}\n")
 
         # Limit
-        result += f"{lang('long_limit')}{lang('colon')}{code(config['limit'])}\n"
+        result += f"{lang('long_limit')}{lang('colon')}{code(config.get('limit'))}\n"
     except Exception as e:
         logger.warning(f"Get config text error: {e}", exc_info=True)
 
