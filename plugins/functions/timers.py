@@ -26,7 +26,7 @@ from .channel import share_data, share_regex_count
 from .etc import code, general_link, lang, thread
 from .file import save
 from .group import leave_group
-from .telegram import get_admins, get_group_info, send_message
+from .telegram import get_admins, get_chat_member, get_group_info, send_message
 
 # Enable logging
 logger = logging.getLogger(__name__)
@@ -129,8 +129,14 @@ def update_admins(client: Bot) -> bool:
                 reason = "permissions"
                 admin_members = get_admins(client, gid)
                 if admin_members and any([admin.user.id == glovar.long_id for admin in admin_members]):
-                    glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
-                                             if not admin.user.is_bot or admin.user.id in glovar.bot_ids}
+                    # Get user admins
+                    glovar.admin_ids[gid] = {admin.user.id for admin in admin_members}
+
+                    # Get bot admins
+                    for bid in glovar.bot_ids:
+                        chat_member = get_chat_member(client, gid, bid)
+                        chat_member and glovar.admin_ids[gid].add(bid)
+
                     if glovar.user_id not in glovar.admin_ids[gid]:
                         reason = "user"
                     else:

@@ -346,6 +346,7 @@ regex: Dict[str, bool] = {
     "con": False,
     "del": False,
     "iml": False,
+    "nm": False,
     "spc": False,
     "spe": False,
     "wb": True
@@ -355,7 +356,7 @@ sender: str = "LONG"
 
 should_hide: bool = False
 
-version: str = "0.0.6"
+version: str = "0.0.7"
 
 # Load data from pickle
 
@@ -465,6 +466,23 @@ for file in file_list:
     except Exception as e:
         logger.critical(f"Load data {file} backup error: {e}", exc_info=True)
         raise SystemExit("[DATA CORRUPTION]")
+
+# Generate special characters dictionary
+for special in ["spc", "spe"]:
+    locals()[f"{special}_dict"]: Dict[str, str] = {}
+    for rule in locals()[f"{special}_words"]:
+        # Check keys
+        if "[" not in rule:
+            continue
+
+        # Check value
+        if "?#" not in rule:
+            continue
+
+        keys = rule.split("]")[0][1:]
+        value = rule.split("?#")[1][1]
+        for k in keys:
+            locals()[f"{special}_dict"][k] = value
 
 # Start program
 copyright_text = (f"SCP-079-{sender} v{version}, Copyright (C) 2019 SCP-079 <https://scp-079.org>\n"

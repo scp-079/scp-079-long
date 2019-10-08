@@ -72,6 +72,20 @@ def get_admins(client: Bot, cid: int) -> Optional[Union[bool, List[ChatMember]]]
     return result
 
 
+def get_chat_member(client: Bot, cid: int, uid: int) -> Optional[Union[bool, ChatMember]]:
+    # Get a chat member
+    result = None
+    try:
+        try:
+            result = client.get_chat_member(chat_id=cid, user_id=uid)
+        except BadRequest:
+            return False
+    except Exception as e:
+        logger.warning(f"Get chat member {uid} in {cid} error: {e}", exc_info=True)
+
+    return result
+
+
 def get_group_info(client: Bot, chat: Union[int, Chat]) -> (str, str):
     # Get a group's name and link
     group_name = "Unknown Group"

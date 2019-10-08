@@ -105,8 +105,8 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
         mid = message.message_id
         now = int(message.date.strftime("%s")) or get_now()
 
-        full_name = get_full_name(message.from_user)
-        forward_name = get_forward_name(message)
+        full_name = get_full_name(message.from_user, True)
+        forward_name = get_forward_name(message, True)
 
         if is_regex_text("wb", full_name) or is_regex_text("wb", forward_name):
             result = forward_evidence(

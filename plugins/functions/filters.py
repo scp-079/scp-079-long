@@ -24,7 +24,7 @@ from telegram import Message
 from telegram.ext import BaseFilter
 
 from .. import glovar
-from .etc import get_now, get_int, get_text
+from .etc import get_now, get_int, get_forward_name, get_full_name, get_text
 from .file import save
 from .ids import init_group_id
 
@@ -310,28 +310,59 @@ def is_long_text(message: Message) -> int:
         # Basic data
         gid = message.chat.id
 
-        # Check
+        # Get text
         text = get_text(message)
         if not text.strip():
             return 0
 
+        # If the user is being punished
         if is_detected_user(message):
             return 79
 
+        # Get length
         length = len(text.encode())
+
+        # Check limit
         if length >= glovar.configs[gid]["limit"]:
             # Work with NOSPAM
             if length <= 10000:
+                # Check the forward from name:
+                forward_name = get_forward_name(message, True)
+                if forward_name and forward_name not in glovar.except_ids["long"]:
+                    if is_nm_text(forward_name):
+                        return False
+
+                # Check the user's name:
+                name = get_full_name(message.from_user, True)
+                if name and name not in glovar.except_ids["long"]:
+                    if is_nm_text(name):
+                        return False
+
+                # Check text
+                normal_text = get_text(message, True)
                 if glovar.nospam_id in glovar.admin_ids[gid]:
-                    if is_ban_text(text):
+                    if is_ban_text(normal_text):
                         return 0
 
-                    if is_regex_text("del", text):
+                    if is_regex_text("del", normal_text):
                         return 0
 
             return length
     except Exception as e:
         logger.warning(f"Is long text error: {e}", exc_info=True)
+
+    return False
+
+
+def is_nm_text(text: str) -> bool:
+    # Check if the text is nm text
+    try:
+        if (is_regex_text("nm", text)
+                or is_ban_text(text)
+                or is_regex_text("bio", text)):
+            return True
+    except Exception as e:
+        logger.warning(f"Is nm text error: {e}", exc_info=True)
 
     return False
 
