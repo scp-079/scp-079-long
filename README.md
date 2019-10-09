@@ -13,7 +13,7 @@ See [this article](https://scp-079.org/long/).
 ## Requirements
 
 - Python 3.6 or higher
-- Ubuntu: `sudo apt update && sudo apt install opencc -y`
+- Debian 10: `sudo apt update && sudo apt install opencc -y`
 - pip: `pip install -r requirements.txt` or `pip install -U APScheduler OpenCC pyAesCrypt python-telegram-bot[socks]`
 
 ## Files
