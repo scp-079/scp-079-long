@@ -33,17 +33,19 @@ def long_test(client: Bot, message: Message) -> bool:
     # Test message's length
     try:
         message_text = get_text(message)
-        if message_text:
-            if re.search(f"^{lang('admin')}{lang('colon')}[0-9]", message_text):
-                return True
-            else:
-                aid = message.from_user.id
+        if not message_text:
+            return True
 
-            length = len(message_text.encode())
-            if length >= 1500:
-                text = (f"{lang('admin')}{lang('colon')}{user_mention(aid)}\n\n"
-                        f"{lang('message_length')}{lang('colon')}{code(length)}\n")
-                thread(send_message, (client, glovar.test_group_id, text, message.message_id))
+        if re.search(f"^{lang('admin')}{lang('colon')}[0-9]", message_text):
+            return True
+        else:
+            aid = message.from_user.id
+
+        length = len(message_text.encode())
+        if length >= 1500:
+            text = (f"{lang('admin')}{lang('colon')}{user_mention(aid)}\n\n"
+                    f"{lang('message_length')}{lang('colon')}{code(length)}\n")
+            thread(send_message, (client, glovar.test_group_id, text, message.message_id))
 
         return True
     except Exception as e:

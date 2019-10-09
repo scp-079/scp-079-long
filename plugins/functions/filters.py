@@ -37,11 +37,17 @@ class FilterClassC(BaseFilter):
     def filter(self, message: Message):
         try:
             if message.from_user:
+                # Basic data
                 uid = message.from_user.id
                 gid = message.chat.id
-                if init_group_id(gid):
-                    if uid in glovar.admin_ids[gid] or uid in glovar.bot_ids:
-                        return True
+
+                # Init the group
+                if not init_group_id(gid):
+                    return False
+
+                # Check permission
+                if uid in glovar.admin_ids[gid] or uid in glovar.bot_ids or message.from_user.is_self:
+                    return True
         except Exception as e:
             logger.warning(f"Is class c error: {e}", exc_info=True)
 
@@ -323,35 +329,37 @@ def is_long_text(message: Message) -> int:
         length = len(text.encode())
 
         # Check limit
-        if length >= glovar.configs[gid]["limit"]:
-            # Work with NOSPAM
-            if length <= 10000:
-                # Check the forward from name:
-                forward_name = get_forward_name(message, True)
-                if forward_name and forward_name not in glovar.except_ids["long"]:
-                    if is_nm_text(forward_name):
-                        return False
+        if length < glovar.configs[gid]["limit"]:
+            return 0
 
-                # Check the user's name:
-                name = get_full_name(message.from_user, True)
-                if name and name not in glovar.except_ids["long"]:
-                    if is_nm_text(name):
-                        return False
+        # Work with NOSPAM
+        if length <= 10000:
+            # Check the forward from name:
+            forward_name = get_forward_name(message, True)
+            if forward_name and forward_name not in glovar.except_ids["long"]:
+                if is_nm_text(forward_name):
+                    return 0
 
-                # Check text
-                normal_text = get_text(message, True)
-                if glovar.nospam_id in glovar.admin_ids[gid]:
-                    if is_ban_text(normal_text):
-                        return 0
+            # Check the user's name:
+            name = get_full_name(message.from_user, True)
+            if name and name not in glovar.except_ids["long"]:
+                if is_nm_text(name):
+                    return 0
 
-                    if is_regex_text("del", normal_text):
-                        return 0
+            # Check text
+            normal_text = get_text(message, True)
+            if glovar.nospam_id in glovar.admin_ids[gid]:
+                if is_ban_text(normal_text):
+                    return 0
+
+                if is_regex_text("del", normal_text):
+                    return 0
 
             return length
     except Exception as e:
         logger.warning(f"Is long text error: {e}", exc_info=True)
 
-    return False
+    return 0
 
 
 def is_nm_text(text: str) -> bool:

@@ -228,22 +228,24 @@ def receive_file_data(client: Bot, message: Message, decrypt: bool = True) -> An
 
         file_id = message.document.file_id
         path = get_downloaded_path(client, file_id)
-        if path:
-            if decrypt:
-                # Decrypt the file, save to the tmp directory
-                path_decrypted = get_new_path()
-                crypt_file("decrypt", path, path_decrypted)
-                path_final = path_decrypted
-            else:
-                # Read the file directly
-                path_decrypted = ""
-                path_final = path
+        if not path:
+            return None
 
-            with open(path_final, "rb") as f:
-                data = pickle.load(f)
+        if decrypt:
+            # Decrypt the file, save to the tmp directory
+            path_decrypted = get_new_path()
+            crypt_file("decrypt", path, path_decrypted)
+            path_final = path_decrypted
+        else:
+            # Read the file directly
+            path_decrypted = ""
+            path_final = path
 
-            for f in {path, path_decrypted}:
-                thread(delete_file, (f,))
+        with open(path_final, "rb") as f:
+            data = pickle.load(f)
+
+        for f in {path, path_decrypted}:
+            thread(delete_file, (f,))
     except Exception as e:
         logger.warning(f"Receive file error: {e}", exc_info=True)
 
