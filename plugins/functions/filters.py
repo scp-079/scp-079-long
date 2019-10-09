@@ -46,7 +46,7 @@ class FilterClassC(BaseFilter):
                     return False
 
                 # Check permission
-                if uid in glovar.admin_ids[gid] or uid in glovar.bot_ids or message.from_user.is_self:
+                if uid in glovar.admin_ids[gid] or uid in glovar.bot_ids:
                     return True
         except Exception as e:
             logger.warning(f"Is class c error: {e}", exc_info=True)
