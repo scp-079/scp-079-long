@@ -108,6 +108,7 @@ def config(update: Update, context: CallbackContext) -> bool:
         # Set lock
         glovar.configs[gid]["lock"] = now
         save("configs")
+
         # Ask CONFIG generate a config session
         group_name, group_link = get_group_info(client, message.chat)
         share_data(
