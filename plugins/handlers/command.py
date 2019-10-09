@@ -126,7 +126,8 @@ def config(update: Update, context: CallbackContext) -> bool:
                 "default": glovar.default_config
             }
         )
-        # Send a report message to debug channel
+
+        # Send debug
         text = get_debug_text(client, message.chat)
         text += (f"{lang('admin_group')}{lang('colon')}{code(message.from_user.id)}\n"
                  f"{lang('action')}{lang('colon')}{code(lang('config_create'))}\n")
