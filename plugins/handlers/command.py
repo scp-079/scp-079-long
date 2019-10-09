@@ -220,8 +220,16 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
             reason = lang("command_usage")
 
         if success and new_config != glovar.configs[gid]:
+            # Save new config
             glovar.configs[gid] = new_config
             save("configs")
+
+            # Send debug
+            debug_text = get_debug_text(client, message.chat)
+            debug_text += (f"{lang('admin_group')}{lang('colon')}{code(message.from_user.id)}\n"
+                           f"{lang('action')}{lang('colon')}{code(lang('config_change'))}\n"
+                           f"{lang('more')}{lang('colon')}{code(f'{command_type} {command_context}')}\n")
+            thread(send_message, (client, glovar.debug_channel_id, debug_text))
 
         text += (f"{lang('action')}{lang('colon')}{code(lang('config_change'))}\n"
                  f"{lang('status')}{lang('colon')}{code(reason)}\n")
