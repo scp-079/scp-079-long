@@ -346,7 +346,7 @@ def is_long_text(message: Message) -> int:
                 if is_nm_text(name):
                     return 0
 
-            # Check text
+            # Check the text
             normal_text = get_text(message, True)
             if glovar.nospam_id in glovar.admin_ids[gid]:
                 if is_ban_text(normal_text):
