@@ -224,12 +224,17 @@ def receive_config_show(client: Bot, data: dict) -> bool:
 def receive_declared_message(data: dict) -> bool:
     # Update declared message's id
     try:
+        # Basic data
         gid = data["group_id"]
         mid = data["message_id"]
-        if glovar.admin_ids.get(gid):
-            if init_group_id(gid):
-                glovar.declared_message_ids[gid].add(mid)
-                return True
+
+        if not glovar.admin_ids.get(gid):
+            return True
+
+        if init_group_id(gid):
+            glovar.declared_message_ids[gid].add(mid)
+
+        return True
     except Exception as e:
         logger.warning(f"Receive declared message error: {e}", exc_info=True)
 
