@@ -352,6 +352,8 @@ def share_watch_user(client: Bot, the_type: str, uid: int, until: str) -> bool:
     except Exception as e:
         logger.warning(f"Share watch user error: {e}", exc_info=True)
 
+    return False
+
 
 def update_score(client: Bot, uid: int) -> bool:
     # Update a user's score, share it
