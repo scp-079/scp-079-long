@@ -336,15 +336,13 @@ def is_long_text(message: Message) -> int:
         if length <= 10000:
             # Check the forward from name:
             forward_name = get_forward_name(message, True)
-            if forward_name and forward_name not in glovar.except_ids["long"]:
-                if is_nm_text(forward_name):
-                    return 0
+            if is_nm_text(forward_name):
+                return 0
 
             # Check the user's name:
             name = get_full_name(message.from_user, True)
-            if name and name not in glovar.except_ids["long"]:
-                if is_nm_text(name):
-                    return 0
+            if is_nm_text(name):
+                return 0
 
             # Check the text
             normal_text = get_text(message, True)
