@@ -48,10 +48,12 @@ def download_media(client: Bot, file_id: str, file_path: str):
     result = None
     try:
         file = client.get_file(file_id=file_id)
-        if file:
-            downloaded = file.download(custom_path=file_path)
-            if downloaded:
-                result = file_path
+        if not file:
+            return None
+
+        downloaded = file.download(custom_path=file_path)
+        if downloaded:
+            result = file_path
     except Exception as e:
         logger.warning(f"Download media {file_id} to {file_path} error: {e}", exc_info=True)
 
@@ -133,17 +135,17 @@ def leave_chat(client: Bot, cid: int) -> Optional[bool]:
     return result
 
 
-def send_document(client: Bot, cid: int, file: str, text: str = None, mid: int = None,
+def send_document(client: Bot, cid: int, document: str, caption: str = None, mid: int = None,
                   markup: InlineKeyboardMarkup = None) -> Optional[Union[bool, Message]]:
     # Send a document to a chat
     result = None
     try:
         try:
-            with open(file, "rb") as f:
+            with open(document, "rb") as f:
                 result = client.send_document(
                     chat_id=cid,
                     document=f,
-                    caption=text,
+                    caption=caption,
                     parse_mode=ParseMode.HTML,
                     reply_to_message_id=mid,
                     reply_markup=markup
@@ -161,18 +163,20 @@ def send_message(client: Bot, cid: int, text: str, mid: int = None,
     # Send a message to a chat
     result = None
     try:
-        if text.strip():
-            try:
-                result = client.send_message(
-                    chat_id=cid,
-                    text=text,
-                    parse_mode=ParseMode.HTML,
-                    disable_web_page_preview=True,
-                    reply_to_message_id=mid,
-                    reply_markup=markup
-                )
-            except BadRequest:
-                return False
+        if not text.strip():
+            return None
+
+        try:
+            result = client.send_message(
+                chat_id=cid,
+                text=text,
+                parse_mode=ParseMode.HTML,
+                disable_web_page_preview=True,
+                reply_to_message_id=mid,
+                reply_markup=markup
+            )
+        except BadRequest:
+            return False
     except Exception as e:
         logger.warning(f"Send message to {cid} error: {e}", exc_info=True)
 
@@ -184,17 +188,19 @@ def send_report_message(secs: int, client: Bot, cid: int, text: str, mid: int = 
     # Send a message that will be auto deleted to a chat
     result = None
     try:
-        if text.strip():
-            result = client.send_message(
-                chat_id=cid,
-                text=text,
-                parse_mode=ParseMode.HTML,
-                disable_web_page_preview=True,
-                reply_to_message_id=mid,
-                reply_markup=markup
-            )
-            mid = result.message_id
-            delay(secs, delete_message, [client, cid, mid])
+        if not text.strip():
+            return None
+
+        result = client.send_message(
+            chat_id=cid,
+            text=text,
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True,
+            reply_to_message_id=mid,
+            reply_markup=markup
+        )
+        mid = result.message_id
+        delay(secs, delete_message, [client, cid, mid])
     except Exception as e:
         logger.warning(f"Send message to {cid} error: {e}", exc_info=True)
 
