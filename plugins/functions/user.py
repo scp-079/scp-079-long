@@ -212,7 +212,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 client=client,
                 message=message,
                 level=lang("auto_delete"),
-                rule=lang("custom_group"),
+                rule=lang("rule_custom"),
                 length=length
             )
             if result:
