@@ -48,7 +48,7 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
         # /config_long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
-            command=["config_long"],
+            command=[f"config_{glovar.sender.lower()}"],
             callback=config_directly,
             filters=Filters.update.messages & Filters.group & ~test_group & from_user
         ))
