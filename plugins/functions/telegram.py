@@ -199,6 +199,10 @@ def send_report_message(secs: int, client: Bot, cid: int, text: str, mid: int = 
             reply_to_message_id=mid,
             reply_markup=markup
         )
+
+        if not result:
+            return None
+
         mid = result.message_id
         delay(secs, delete_message, [client, cid, mid])
     except Exception as e:
