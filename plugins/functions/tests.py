@@ -41,7 +41,10 @@ def long_test(client: Bot, message: Message) -> bool:
         else:
             aid = message.from_user.id
 
+        # Get length
         length = len(message_text.encode())
+
+        # Send the result
         if length >= 1500:
             text = (f"{lang('admin')}{lang('colon')}{user_mention(aid)}\n\n"
                     f"{lang('message_length')}{lang('colon')}{code(length)}\n")
