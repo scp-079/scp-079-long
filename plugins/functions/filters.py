@@ -18,6 +18,7 @@
 
 import logging
 import re
+from string import ascii_lowercase
 from typing import Union
 
 from telegram import Message
@@ -200,14 +201,39 @@ new_group = FilterNewGroup()
 test_group = FilterTestGroup()
 
 
+def is_ad_text(text: str, matched: str = "") -> str:
+    # Check if the text is ad text
+    try:
+        if not text:
+            return ""
+
+        for c in ascii_lowercase:
+            if c != matched and is_regex_text(f"ad{c}", text):
+                return c
+    except Exception as e:
+        logger.warning(f"Is ad text error: {e}", exc_info=True)
+
+    return ""
+
+
 def is_ban_text(text: str) -> bool:
     # Check if the text is ban text
     try:
         if is_regex_text("ban", text):
             return True
 
-        if is_regex_text("ad", text) and (is_regex_text("con", text) or is_regex_text("iml", text)):
+        ad = is_regex_text("ad", text)
+        con = is_regex_text("con", text) or is_regex_text("iml", text)
+        if ad and con:
             return True
+
+        ad = is_ad_text(text)
+        if ad and con:
+            return True
+
+        if ad:
+            ad = is_ad_text(text, ad)
+            return bool(ad)
     except Exception as e:
         logger.warning(f"Is ban text error: {e}", exc_info=True)
 
@@ -313,6 +339,9 @@ def is_high_score_user(message: Message) -> Union[bool, float]:
 def is_long_text(message: Message) -> int:
     # Check if the text is super long
     try:
+        if not message.chat:
+            return 0
+
         # Basic data
         gid = message.chat.id
 
