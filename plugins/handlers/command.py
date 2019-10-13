@@ -189,7 +189,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
                         new_config = deepcopy(glovar.default_config)
                 else:
                     if command_context:
-                        if command_type in {"delete"}:
+                        if command_type in {"delete", "restrict"}:
                             if command_context == "off":
                                 new_config[command_type] = False
                             elif command_context == "on":
