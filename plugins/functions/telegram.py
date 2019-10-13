@@ -19,7 +19,7 @@
 import logging
 from typing import List, Optional, Union
 
-from telegram import Bot, Chat, ChatMember, InlineKeyboardMarkup, Message, ParseMode
+from telegram import Bot, Chat, ChatMember, ChatPermissions, InlineKeyboardMarkup, Message, ParseMode
 from telegram.error import BadRequest
 
 from .. import glovar
@@ -131,6 +131,23 @@ def leave_chat(client: Bot, cid: int) -> Optional[bool]:
         result = client.leave_chat(chat_id=cid)
     except Exception as e:
         logger.warning(f"Leave chat {cid} error: {e}", exc_info=True)
+
+    return result
+
+
+def restrict_chat_member(client: Bot, cid: int, uid: int, permissions: ChatPermissions,
+                         until_date: int = 0) -> bool:
+    # Restrict a user in a supergroup
+    result = None
+    try:
+        result = client.restrict_chat_member(
+            chat_id=cid,
+            user_id=uid,
+            until_date=until_date,
+            permissions=permissions
+        )
+    except Exception as e:
+        logger.warning(f"Restrict chat member error: {e}", exc_info=True)
 
     return result
 

@@ -25,10 +25,11 @@ from telegram.ext import CallbackContext, Dispatcher, Filters, PrefixHandler
 
 from .. import glovar
 from ..functions.channel import get_debug_text, share_data
-from ..functions.etc import bold, code, delay, get_command_context, get_command_type, get_config_text, get_int, get_now
-from ..functions.etc import lang, thread, user_mention
+from ..functions.etc import bold, code, delay, get_command_context, get_command_type, get_int, get_now, lang
+from ..functions.etc import thread, user_mention
 from ..functions.file import save
 from ..functions.filters import from_user, is_class_c, test_group
+from ..functions.group import get_config_text
 from ..functions.telegram import delete_message, get_group_info, send_message, send_report_message
 
 # Enable logging

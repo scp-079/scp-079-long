@@ -21,12 +21,32 @@ import logging
 from telegram import Bot
 
 from .. import glovar
-from .etc import thread
+from .etc import code, lang, thread
 from .file import save
 from .telegram import leave_chat
 
 # Enable logging
 logger = logging.getLogger(__name__)
+
+
+def get_config_text(config: dict) -> str:
+    # Get config text
+    result = ""
+    try:
+        # Basic
+        default_text = (lambda x: lang("default") if x else lang("custom"))(config.get("default"))
+        delete_text = (lambda x: lang("enabled") if x else lang("disabled"))(config.get("delete"))
+        restrict_text = (lambda x: lang("enabled") if x else lang("disabled"))(config.get("restrict"))
+        result += (f"{lang('config')}{lang('colon')}{code(default_text)}\n"
+                   f"{lang('delete')}{lang('colon')}{code(delete_text)}\n"
+                   f"{lang('restrict')}{lang('colon')}{code(restrict_text)}\n")
+
+        # Limit
+        result += f"{lang('long_limit')}{lang('colon')}{code(config.get('limit'))}\n"
+    except Exception as e:
+        logger.warning(f"Get config text error: {e}", exc_info=True)
+
+    return result
 
 
 def leave_group(client: Bot, gid: int) -> bool:

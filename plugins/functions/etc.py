@@ -184,24 +184,6 @@ def get_command_type(message: Message) -> str:
     return result
 
 
-def get_config_text(config: dict) -> str:
-    # Get config text
-    result = ""
-    try:
-        # Basic
-        default_text = (lambda x: lang("default") if x else lang("custom"))(config.get("default"))
-        delete_text = (lambda x: lang("enabled") if x else lang("disabled"))(config.get("delete"))
-        result += (f"{lang('config')}{lang('colon')}{code(default_text)}\n"
-                   f"{lang('delete')}{lang('colon')}{code(delete_text)}\n")
-
-        # Limit
-        result += f"{lang('long_limit')}{lang('colon')}{code(config.get('limit'))}\n"
-    except Exception as e:
-        logger.warning(f"Get config text error: {e}", exc_info=True)
-
-    return result
-
-
 def get_forward_name(message: Message, normal: bool = False) -> str:
     # Get forwarded message's origin sender's name
     text = ""

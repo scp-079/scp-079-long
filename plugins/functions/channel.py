@@ -35,17 +35,18 @@ def ask_for_help(client: Bot, level: str, gid: int, uid: int, group: str = "sing
     # Let USER help to delete all message from user, or ban user globally
     try:
         data = {
-                "group_id": gid,
-                "user_id": uid
+            "group_id": gid,
+            "user_id": uid
         }
         should_delete = glovar.configs[gid].get("delete")
+
         if level == "ban":
+            data["type"] = (glovar.configs[gid].get("restrict") and "restrict") or "ban"
             data["delete"] = should_delete
         elif level == "delete":
+            data["type"] = group
             if not should_delete:
                 return True
-
-            data["type"] = group
 
         share_data(
             client=client,

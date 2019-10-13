@@ -23,12 +23,12 @@ from telegram.ext import CallbackContext, Dispatcher, Filters, MessageHandler
 
 from .. import glovar
 from ..functions.channel import get_debug_text
-from ..functions.etc import code, general_link, lang, thread, user_mention
+from ..functions.etc import code, general_link, get_full_name, get_now, lang, thread, user_mention
 from ..functions.file import save
 from ..functions.filters import class_c, class_d, declared_message, exchange_channel, from_user, hide_channel
-from ..functions.filters import is_declared_message, is_long_text, new_group, test_group
+from ..functions.filters import is_declared_message, is_long_text, is_nm_text, new_group, test_group
 from ..functions.group import leave_group
-from ..functions.ids import init_group_id
+from ..functions.ids import init_group_id, init_user_id
 from ..functions.receive import receive_add_bad, receive_add_except, receive_clear_data, receive_config_commit
 from ..functions.receive import receive_config_reply, receive_config_show, receive_declared_message
 from ..functions.receive import receive_leave_approve, receive_refresh, receive_regex, receive_remove_bad
@@ -51,6 +51,11 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
             filters=(Filters.update.messages & Filters.group & ~test_group & from_user & ~Filters.status_update
                      & ~class_c & ~class_d & ~declared_message),
             callback=check
+        ))
+        # Check join
+        dispatcher.add_handler(MessageHandler(
+            filters=Filters.group & ~test_group & from_user & Filters.status_update.new_chat_members & ~new_group,
+            callback=check_join
         ))
         # Exchange emergency
         dispatcher.add_handler(MessageHandler(
@@ -100,6 +105,53 @@ def check(update: Update, context: CallbackContext) -> bool:
         return True
     except Exception as e:
         logger.warning(f"Check error: {e}", exc_info=True)
+    finally:
+        glovar.locks["message"].release()
+
+    return False
+
+
+def check_join(update: Update, context: CallbackContext) -> bool:
+    # Check new joined user
+    glovar.locks["message"].acquire()
+    try:
+        _ = context.bot
+        message = update.effective_message
+
+        # Basic data
+        gid = message.chat.id
+        now = int(message.date.strftime("%s")) or get_now()
+
+        for new in message.new_chat_members:
+            # Basic data
+            uid = new.id
+
+            # Work with NOSPAM
+            if glovar.nospam_id in glovar.admin_ids[gid]:
+                # Check if the user is Class D personnel
+                if uid in glovar.bad_ids["users"]:
+                    return True
+
+                # Check name
+                name = get_full_name(new, True)
+                if name and is_nm_text(name):
+                    return True
+
+            # Check declare status
+            if is_declared_message(message):
+                return True
+
+            # Init the user's status
+            if not init_user_id(uid):
+                continue
+
+            # Update user's join status
+            glovar.user_ids[uid]["join"][gid] = now
+            save("user_ids")
+
+        return True
+    except Exception as e:
+        logger.warning(f"Check join error: {e}", exc_info=True)
     finally:
         glovar.locks["message"].release()
 

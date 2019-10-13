@@ -73,10 +73,14 @@ test_group_id: int = 0
 backup: Union[bool, str] = ""
 date_reset: str = ""
 default_group_link: str = ""
+limit_track: int = 0
 project_link: str = ""
 project_name: str = ""
 time_ban: int = 0
+time_new: int = 0
 time_punish: int = 0
+time_short: int = 0
+time_track: int = 0
 zh_cn: Union[bool, str] = ""
 
 # [encrypt]
@@ -119,10 +123,14 @@ try:
     backup = eval(backup)
     date_reset = config["custom"].get("date_reset", date_reset)
     default_group_link = config["custom"].get("default_group_link", default_group_link)
+    limit_track = int(config["custom"].get("limit_track", limit_track))
     project_link = config["custom"].get("project_link", project_link)
     project_name = config["custom"].get("project_name", project_name)
     time_ban = int(config["custom"].get("time_ban", time_ban))
+    time_new = int(config["custom"].get("time_new", time_new))
     time_punish = int(config["custom"].get("time_punish", time_punish))
+    time_short = int(config["custom"].get("time_short", time_short))
+    time_track = int(config["custom"].get("time_track", time_track))
     zh_cn = config["custom"].get("zh_cn", zh_cn)
     zh_cn = eval(zh_cn)
     # [encrypt]
@@ -159,10 +167,14 @@ if (enabled not in {False, True}
         or backup not in {False, True}
         or date_reset in {"", "[DATA EXPUNGED]"}
         or default_group_link in {"", "[DATA EXPUNGED]"}
+        or limit_track == 0
         or project_link in {"", "[DATA EXPUNGED]"}
         or project_name in {"", "[DATA EXPUNGED]"}
         or time_ban == 0
+        or time_new == 0
         or time_punish == 0
+        or time_short == 0
+        or time_track == 0
         or zh_cn not in {False, True}
         or key in {b"", b"[DATA EXPUNGED]", "", "[DATA EXPUNGED]"}
         or password in {"", "[DATA EXPUNGED]"}):
@@ -213,6 +225,7 @@ lang: Dict[str, str] = {
     "custom": (zh_cn and "自定义") or "Custom",
     "default": (zh_cn and "默认") or "Default",
     "delete": (zh_cn and "协助删除") or "Help Delete",
+    "restrict": (zh_cn and "禁言模式") or "Restriction Mode",
     "long_limit": (zh_cn and "消息字节上限") or "Bytes Length Limit",
     # Debug
     "triggered_by": (zh_cn and "触发消息") or "Triggered By",
@@ -266,6 +279,7 @@ lang: Dict[str, str] = {
     "auto_delete": (zh_cn and "自动删除") or "Auto Delete",
     "name_ban": (zh_cn and "名称封禁") or "Ban by Name",
     "name_examine": (zh_cn and "名称检查") or "Name Examination",
+    "op_upgrade": (zh_cn and "操作升级") or "Operation Upgrade",
     "rule_custom": (zh_cn and "群组自定义") or "Custom Rule",
     "score_ban": (zh_cn and "评分封禁") or "Ban by Score",
     "score_user": (zh_cn and "用户评分") or "High Score",
@@ -303,6 +317,7 @@ default_config: Dict[str, Union[bool, int]] = {
 
 default_user_status: Dict[str, Dict[Union[int, str], Union[float, int]]] = {
     "detected": {},
+    "join": {},
     "score": {
         "captcha": 0.0,
         "clean": 0.0,
@@ -344,6 +359,7 @@ recorded_ids: Dict[int, Set[int]] = {}
 regex: Dict[str, bool] = {
     "ad": False,
     "ban": False,
+    "bio": False,
     "con": False,
     "del": False,
     "iml": False,
@@ -359,7 +375,7 @@ sender: str = "LONG"
 
 should_hide: bool = False
 
-version: str = "0.0.7"
+version: str = "0.0.8"
 
 # Load data from pickle
 
@@ -401,6 +417,9 @@ user_ids: Dict[int, Dict[str, Dict[Union[int, str], Union[float, int]]]] = {}
 #     12345678: {
 #         "detected": {
 #               -10012345678: 1512345678
+#         },
+#         "join": {
+#             -10012345678: 1512345678
 #         },
 #         "score": {
 #             "captcha": 0.0,

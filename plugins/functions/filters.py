@@ -21,7 +21,7 @@ import re
 from string import ascii_lowercase
 from typing import Union
 
-from telegram import Message
+from telegram import Message, User
 from telegram.ext import BaseFilter
 
 from .. import glovar
@@ -278,6 +278,20 @@ def is_class_d(_, message: Message) -> bool:
     return False
 
 
+def is_class_e_user(user: User) -> bool:
+    # Check if the user is a Class E personnel
+    try:
+        uid = user.id
+        group_list = list(glovar.admin_ids)
+        for gid in group_list:
+            if uid in glovar.admin_ids.get(gid, set()):
+                return True
+    except Exception as e:
+        logger.warning(f"Is class e user error: {e}", exc_info=True)
+
+    return False
+
+
 def is_declared_message(message: Message) -> bool:
     # Check if the message is declared by other bots
     try:
@@ -320,18 +334,60 @@ def is_detected_user_id(gid: int, uid: int, now: int) -> bool:
     return False
 
 
-def is_high_score_user(message: Message) -> Union[bool, float]:
+def is_high_score_user(message: Union[Message, User]) -> float:
     # Check if the message is sent by a high score user
     try:
-        if message.from_user:
-            uid = message.from_user.id
-            user = glovar.user_ids.get(uid, {})
-            if user:
-                score = sum(user["score"].values())
-                if score >= 3.0:
-                    return score
+        if isinstance(message, Message):
+            user = message.from_user
+        else:
+            user = message
+
+        if not user:
+            return 0.0
+
+        uid = user.id
+        user_status = glovar.user_ids.get(uid, {})
+        if user_status:
+            score = sum(user_status["score"].values())
+            if score >= 3.0:
+                return score
     except Exception as e:
         logger.warning(f"Is high score user error: {e}", exc_info=True)
+
+    return 0.0
+
+
+def is_limited_user(gid: int, user: User, now: int) -> bool:
+    # Check the user is limited
+    try:
+        if is_class_e_user(user):
+            return False
+
+        if glovar.configs[gid].get("new"):
+            if is_new_user(user, now, gid):
+                return True
+
+        uid = user.id
+
+        if not glovar.user_ids.get(uid, {}):
+            return False
+
+        if not glovar.user_ids[uid].get("join", {}):
+            return False
+
+        if is_high_score_user(user) >= 1.8:
+            return True
+
+        join = glovar.user_ids[uid]["join"].get(gid, 0)
+        if now - join < glovar.time_short:
+            return True
+
+        track = [gid for gid in glovar.user_ids[uid]["join"]
+                 if now - glovar.user_ids[uid]["join"][gid] < glovar.time_track]
+        if len(track) >= glovar.limit_track:
+            return True
+    except Exception as e:
+        logger.warning(f"Is limited user error: {e}", exc_info=True)
 
     return False
 
@@ -387,6 +443,38 @@ def is_long_text(message: Message) -> int:
         logger.warning(f"Is long text error: {e}", exc_info=True)
 
     return 0
+
+
+def is_new_user(user: User, now: int, gid: int = 0, joined: bool = False) -> bool:
+    # Check if the message is sent from a new joined member
+    try:
+        if is_class_e_user(user):
+            return False
+
+        uid = user.id
+
+        if not glovar.user_ids.get(uid, {}):
+            return False
+
+        if not glovar.user_ids[uid].get("join", {}):
+            return False
+
+        if joined:
+            return True
+
+        if gid:
+            join = glovar.user_ids[uid]["join"].get(gid, 0)
+            if now - join < glovar.time_new:
+                return True
+        else:
+            for gid in list(glovar.user_ids[uid]["join"]):
+                join = glovar.user_ids[uid]["join"].get(gid, 0)
+                if now - join < glovar.time_new:
+                    return True
+    except Exception as e:
+        logger.warning(f"Is new user error: {e}", exc_info=True)
+
+    return False
 
 
 def is_nm_text(text: str) -> bool:
