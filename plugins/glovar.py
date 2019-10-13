@@ -457,6 +457,7 @@ configs: Dict[int, Dict[str, Union[bool, int]]] = {}
 #         "default": True,
 #         "lock": 15112345678,
 #         "delete": True,
+#         "restrict": False,
 #         "limit": 1000
 #     }
 # }
