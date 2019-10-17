@@ -3,6 +3,7 @@ asn1crypto==1.1.0
 certifi==2019.9.11
 cffi==1.13.0
 cryptography==2.7
+emoji==0.5.4
 future==0.18.0
 OpenCC==0.2
 pyAesCrypt==0.4.3
