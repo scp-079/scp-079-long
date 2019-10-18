@@ -212,10 +212,9 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
             result = forward_evidence(
                 client=client,
                 message=message,
-                level=lang("auto_delete"),
-                rule=lang("watch_user"),
-                length=length,
-                more=lang("op_upgrade")
+                level=lang("global_delete"),
+                rule=lang("op_upgrade"),
+                length=length
             )
             if result:
                 add_watch_user(client, "ban", uid, now)
@@ -227,7 +226,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 send_debug(
                     client=client,
                     chat=message.chat,
-                    action=lang("watch_delete"),
+                    action=lang("global_delete"),
                     uid=uid,
                     mid=mid,
                     em=result
