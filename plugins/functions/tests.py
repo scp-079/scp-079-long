@@ -32,14 +32,15 @@ logger = logging.getLogger(__name__)
 def long_test(client: Bot, message: Message) -> bool:
     # Test message's length
     try:
-        message_text = get_text(message)
-        if not message_text:
-            return True
-
-        if re.search(f"^{lang('admin')}{lang('colon')}[0-9]", message_text):
+        origin_text = get_text(message)
+        if re.search(f"^{lang('admin')}{lang('colon')}[0-9]", origin_text):
             return True
         else:
             aid = message.from_user.id
+
+        message_text = get_text(message)
+        if not message_text:
+            return True
 
         # Get length
         length = len(message_text.encode())
