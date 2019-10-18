@@ -242,7 +242,7 @@ def get_now() -> int:
     return result
 
 
-def get_text(message: Message, normal: bool = False) -> str:
+def get_text(message: Message, normal: bool = False, printable: bool = True) -> str:
     # Get message's text
     text = ""
     try:
@@ -254,7 +254,7 @@ def get_text(message: Message, normal: bool = False) -> str:
             text += the_text
 
         if text:
-            text = t2t(text, normal)
+            text = t2t(text, normal, printable)
     except Exception as e:
         logger.warning(f"Get text error: {e}", exc_info=True)
 
