@@ -50,7 +50,7 @@ add_error_handlers(updater.dispatcher)
 update_status(updater.bot, "online")
 
 # Timer
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(job_defaults={"misfire_grace_time": 60})
 scheduler.add_job(interval_min_10, "interval", minutes=10)
 scheduler.add_job(update_status, "cron", [updater.bot, "awake"], minute=30)
 scheduler.add_job(backup_files, "cron", [updater.bot], hour=20)
