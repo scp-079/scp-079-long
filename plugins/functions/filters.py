@@ -20,7 +20,7 @@ import logging
 import re
 from copy import deepcopy
 from string import ascii_lowercase
-from typing import Union
+from typing import Match, Optional, Union
 
 from telegram import Message, User
 from telegram.ext import BaseFilter
@@ -534,9 +534,9 @@ def is_nm_text(text: str) -> bool:
     return False
 
 
-def is_regex_text(word_type: str, text: str, again: bool = False) -> bool:
+def is_regex_text(word_type: str, text: str, again: bool = False) -> Optional[Match]:
     # Check if the text hit the regex rules
-    result = False
+    result = None
     try:
         if text:
             if not again:
@@ -544,15 +544,13 @@ def is_regex_text(word_type: str, text: str, again: bool = False) -> bool:
             elif " " in text:
                 text = re.sub(r"\s", "", text)
             else:
-                return False
+                return None
         else:
-            return False
+            return None
 
         for word in list(eval(f"glovar.{word_type}_words")):
-            if re.search(word, text, re.I | re.S | re.M):
-                result = True
-
-            # Match, count and return
+            result = re.search(word, text, re.I | re.S | re.M)
+            # Count and return
             if result:
                 count = eval(f"glovar.{word_type}_words").get(word, 0)
                 count += 1

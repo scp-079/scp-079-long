@@ -108,7 +108,7 @@ def get_group_info(client: Bot, chat: Union[int, Chat]) -> (str, str):
         if chat.username:
             group_link = "https://t.me/" + chat.username
     except Exception as e:
-        logger.info(f"Get group info error: {e}", exc_info=True)
+        logger.info(f"Get group {chat} info error: {e}", exc_info=True)
 
     return group_name, group_link
 
@@ -147,7 +147,7 @@ def restrict_chat_member(client: Bot, cid: int, uid: int, permissions: ChatPermi
             permissions=permissions
         )
     except Exception as e:
-        logger.warning(f"Restrict chat member error: {e}", exc_info=True)
+        logger.warning(f"Restrict chat member {uid} in {cid} error: {e}", exc_info=True)
 
     return result
 
@@ -170,7 +170,7 @@ def send_document(client: Bot, cid: int, document: str, caption: str = None, mid
         except BadRequest:
             return False
     except Exception as e:
-        logger.warning(f"Send document to {cid} error: {e}", exec_info=True)
+        logger.warning(f"Send document {document} to {cid} error: {e}", exec_info=True)
 
     return result
 
@@ -223,6 +223,6 @@ def send_report_message(secs: int, client: Bot, cid: int, text: str, mid: int = 
         mid = result.message_id
         delay(secs, delete_message, [client, cid, mid])
     except Exception as e:
-        logger.warning(f"Send message to {cid} error: {e}", exc_info=True)
+        logger.warning(f"Send report message to {cid} error: {e}", exc_info=True)
 
     return result
