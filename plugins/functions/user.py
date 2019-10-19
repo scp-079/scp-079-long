@@ -188,7 +188,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
             result = forward_evidence(
                 client=client,
                 message=message,
-                level=lang("auto_delete"),
+                level=lang("global_delete"),
                 rule=lang("watch_user"),
                 length=length
             )
