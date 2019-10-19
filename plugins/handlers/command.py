@@ -185,8 +185,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
             # Check the config lock
             if now - new_config["lock"] > 310:
                 if command_type == "default":
-                    if not new_config.get("default"):
-                        new_config = deepcopy(glovar.default_config)
+                    new_config = deepcopy(glovar.default_config)
                 else:
                     if command_context:
                         if command_type in {"delete", "restrict"}:
