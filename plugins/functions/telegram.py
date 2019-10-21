@@ -74,6 +74,17 @@ def get_admins(client: Bot, cid: int) -> Optional[Union[bool, List[ChatMember]]]
     return result
 
 
+def get_chat(client: Bot, cid: Union[int, str]) -> Optional[Chat]:
+    # Get a chat
+    result = None
+    try:
+        result = client.get_chat(chat_id=cid)
+    except Exception as e:
+        logger.warning(f"Get chat {cid} error: {e}", exc_info=True)
+
+    return result
+
+
 def get_chat_member(client: Bot, cid: int, uid: int) -> Optional[Union[bool, ChatMember]]:
     # Get a chat member
     result = None
@@ -88,19 +99,23 @@ def get_chat_member(client: Bot, cid: int, uid: int) -> Optional[Union[bool, Cha
     return result
 
 
-def get_group_info(client: Bot, chat: Union[int, Chat]) -> (str, str):
+def get_group_info(client: Bot, chat: Union[int, Chat], cache: bool = True) -> (str, str):
     # Get a group's name and link
     group_name = "Unknown Group"
     group_link = glovar.default_group_link
     try:
         if isinstance(chat, int):
-            result = None
-            try:
-                result = client.get_chat(chat_id=chat)
-            except Exception as e:
-                logger.info(f"Get chat {chat} error: {e}", exc_info=True)
+            the_cache = glovar.chats.get(chat)
+            if the_cache:
+                result = get_chat(client, chat)
 
-            chat = result
+                if cache and result:
+                    glovar.chats[chat] = result
+
+                chat = result
+
+        if not chat:
+            return group_name, group_link
 
         if chat.title:
             group_name = chat.title
