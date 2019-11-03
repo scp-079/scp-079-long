@@ -138,7 +138,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                     mid=mid,
                     em=result
                 )
-        elif is_watch_user(message, "ban"):
+        elif is_watch_user(message.from_user, "ban", now):
             result = forward_evidence(
                 client=client,
                 message=message,
@@ -160,8 +160,8 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                     mid=mid,
                     em=result
                 )
-        elif is_high_score_user(message):
-            score = is_high_score_user(message)
+        elif is_high_score_user(message.from_user):
+            score = is_high_score_user(message.from_user)
             result = forward_evidence(
                 client=client,
                 message=message,
@@ -184,7 +184,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                     mid=mid,
                     em=result
                 )
-        elif is_watch_user(message, "delete"):
+        elif is_watch_user(message.from_user, "delete", now):
             result = forward_evidence(
                 client=client,
                 message=message,

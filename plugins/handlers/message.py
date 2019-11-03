@@ -23,7 +23,7 @@ from telegram.ext import CallbackContext, Dispatcher, Filters, MessageHandler
 
 from .. import glovar
 from ..functions.channel import get_debug_text
-from ..functions.etc import code, general_link, get_full_name, get_now, lang, thread, user_mention
+from ..functions.etc import code, general_link, get_full_name, get_now, lang, thread, mention_id
 from ..functions.file import save
 from ..functions.filters import class_c, class_d, declared_message, exchange_channel, from_user, hide_channel
 from ..functions.filters import is_declared_message, is_long_text, is_nm_text, new_group, test_group
@@ -241,7 +241,7 @@ def init_group(update: Update, context: CallbackContext) -> bool:
             text += (f"{lang('status')}{lang('colon')}{code(lang('status_left'))}\n"
                      f"{lang('reason')}{lang('colon')}{code(lang('reason_unauthorized'))}\n")
             if message.from_user.username:
-                text += f"{lang('inviter')}{lang('colon')}{user_mention(invited_by)}\n"
+                text += f"{lang('inviter')}{lang('colon')}{mention_id(invited_by)}\n"
             else:
                 text += f"{lang('inviter')}{lang('colon')}{code(invited_by)}\n"
 

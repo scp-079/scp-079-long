@@ -26,7 +26,7 @@ from telegram.ext import CallbackContext, Dispatcher, Filters, PrefixHandler
 from .. import glovar
 from ..functions.channel import get_debug_text, share_data
 from ..functions.etc import bold, code, delay, get_command_context, get_command_type, get_int, get_now, lang
-from ..functions.etc import thread, user_mention
+from ..functions.etc import thread, mention_id
 from ..functions.file import save
 from ..functions.filters import from_user, is_class_c, test_group
 from ..functions.group import get_config_text
@@ -270,7 +270,7 @@ def version(update: Update, context: CallbackContext) -> bool:
         cid = message.chat.id
         aid = message.from_user.id
         mid = message.message_id
-        text = (f"{lang('admin')}{lang('colon')}{user_mention(aid)}\n\n"
+        text = (f"{lang('admin')}{lang('colon')}{mention_id(aid)}\n\n"
                 f"{lang('version')}{lang('colon')}{bold(glovar.version)}\n")
         thread(send_message, (client, cid, text, mid))
 

@@ -53,6 +53,7 @@ def leave_group(client: Bot, gid: int) -> bool:
     # Leave a group, clear it's data
     try:
         glovar.left_group_ids.add(gid)
+        save("left_group_ids")
         thread(leave_chat, (client, gid))
 
         glovar.admin_ids.pop(gid, None)

@@ -22,7 +22,7 @@ import re
 from telegram import Bot, Message
 
 from .. import glovar
-from .etc import code, get_text, lang, thread, user_mention
+from .etc import code, get_text, lang, thread, mention_id
 from .telegram import send_message
 
 # Enable logging
@@ -47,7 +47,7 @@ def long_test(client: Bot, message: Message) -> bool:
 
         # Send the result
         if length >= 1500:
-            text = (f"{lang('admin')}{lang('colon')}{user_mention(aid)}\n\n"
+            text = (f"{lang('admin')}{lang('colon')}{mention_id(aid)}\n\n"
                     f"{lang('message_length')}{lang('colon')}{code(length)}\n")
             thread(send_message, (client, glovar.test_group_id, text, message.message_id))
 

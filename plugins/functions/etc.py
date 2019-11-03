@@ -94,6 +94,7 @@ def crypt_str(operation: str, text: str, key: str) -> str:
     try:
         f = Fernet(key)
         text = text.encode("utf-8")
+
         if operation == "decrypt":
             result = f.decrypt(text)
         else:
@@ -160,14 +161,18 @@ def get_command_context(message: Message) -> (str, str):
     try:
         text = get_text(message)
         command_list = text.split(" ")
-        if len(list(filter(None, command_list))) > 1:
-            i = 1
-            command_type = command_list[i]
-            while command_type == "" and i < len(command_list):
-                i += 1
-                command_type = command_list[i]
 
-            command_context = text[1 + len(command_list[0]) + i + len(command_type):].strip()
+        if len(list(filter(None, command_list))) <= 1:
+            return "", ""
+
+        i = 1
+        command_type = command_list[i]
+
+        while command_type == "" and i < len(command_list):
+            i += 1
+            command_type = command_list[i]
+
+        command_context = text[1 + len(command_list[0]) + i + len(command_type):].strip()
     except Exception as e:
         logger.warning(f"Get command context error: {e}", exc_info=True)
 
@@ -194,6 +199,8 @@ def get_forward_name(message: Message, normal: bool = False) -> str:
         if message.forward_from:
             user = message.forward_from
             text = get_full_name(user, normal)
+        elif message.forward_sender_name:
+            text = message.forward_sender_name
         elif message.forward_from_chat:
             chat = message.forward_from_chat
             text = chat.title
@@ -210,8 +217,10 @@ def get_full_name(user: User, normal: bool = False) -> str:
     # Get user's full name
     text = ""
     try:
-        if user:
-            text = user.full_name
+        if not user:
+            return ""
+
+        text = user.full_name
 
         if text:
             text = t2t(text, normal)
@@ -269,6 +278,17 @@ def lang(text: str) -> str:
         result = glovar.lang.get(text, text)
     except Exception as e:
         logger.warning(f"Lang error: {e}", exc_info=True)
+
+    return result
+
+
+def mention_id(uid: int) -> str:
+    # Get a ID mention string
+    result = ""
+    try:
+        result = general_link(f"{uid}", f"tg://user?id={uid}")
+    except Exception as e:
+        logger.warning(f"Mention id error: {e}", exc_info=True)
 
     return result
 
@@ -331,14 +351,3 @@ def thread(target: Callable, args: tuple) -> bool:
         logger.warning(f"Thread error: {e}", exc_info=True)
 
     return False
-
-
-def user_mention(uid: int) -> str:
-    # Get a mention text
-    text = ""
-    try:
-        text = general_link(f"{uid}", f"tg://user?id={uid}")
-    except Exception as e:
-        logger.warning(f"User mention error: {e}", exc_info=True)
-
-    return text

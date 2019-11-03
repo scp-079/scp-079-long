@@ -396,6 +396,7 @@ recorded_ids: Dict[int, Set[int]] = {}
 
 regex: Dict[str, bool] = {
     "ad": False,
+    "aff": False,
     "ban": False,
     "bio": False,
     "con": False,
@@ -414,7 +415,7 @@ sender: str = "LONG"
 
 should_hide: bool = False
 
-version: str = "0.0.8"
+version: str = "0.0.9"
 
 # Load data from pickle
 
