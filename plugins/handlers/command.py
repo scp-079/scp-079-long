@@ -28,7 +28,7 @@ from ..functions.channel import get_debug_text, share_data
 from ..functions.etc import bold, code, delay, get_command_context, get_command_type, get_int, get_now, lang
 from ..functions.etc import thread, mention_id
 from ..functions.file import save
-from ..functions.filters import from_user, is_class_c, test_group
+from ..functions.filters import authorized_group, from_user, is_class_c, test_group
 from ..functions.group import get_config_text
 from ..functions.telegram import delete_message, get_group_info, send_message, send_report_message
 
@@ -44,28 +44,35 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
             prefix=glovar.prefix,
             command=["config"],
             callback=config,
-            filters=Filters.update.messages & Filters.group & ~test_group & from_user
+            filters=(Filters.update.messages & Filters.group
+                     & ~test_group & authorized_group
+                     & from_user)
         ))
         # /config_long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=[f"config_{glovar.sender.lower()}"],
             callback=config_directly,
-            filters=Filters.update.messages & Filters.group & ~test_group & from_user
+            filters=(Filters.update.messages & Filters.group
+                     & ~test_group & authorized_group
+                     & from_user)
         ))
         # /long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["long", "l"],
             callback=long,
-            filters=Filters.update.messages & Filters.group & from_user
+            filters=(Filters.update.messages & Filters.group
+                     & from_user)
         ))
         # /version
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=["version"],
             callback=version,
-            filters=Filters.update.messages & Filters.group & test_group & from_user
+            filters=(Filters.update.messages & Filters.group
+                     & test_group
+                     & from_user)
         ))
 
         return True
@@ -161,6 +168,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
     message = update.effective_message
     gid = message.chat.id
     mid = message.message_id
+
     try:
         # Check permission
         if not is_class_c(None, message):
@@ -171,6 +179,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
         reason = lang("config_updated")
         new_config = deepcopy(glovar.configs[gid])
         text = f"{lang('admin_group')}{lang('colon')}{code(aid)}\n"
+
         # Check command format
         command_type, command_context = get_command_context(message)
         if command_type:
@@ -182,6 +191,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
                 return True
 
             now = get_now()
+
             # Check the config lock
             if now - new_config["lock"] > 310:
                 if command_type == "default":

@@ -25,8 +25,9 @@ from .. import glovar
 from ..functions.channel import get_debug_text
 from ..functions.etc import code, general_link, get_full_name, get_now, lang, thread, mention_id
 from ..functions.file import save
-from ..functions.filters import class_c, class_d, declared_message, exchange_channel, from_user, hide_channel
-from ..functions.filters import is_declared_message, is_long_text, is_nm_text, new_group, test_group
+from ..functions.filters import authorized_group, class_c, class_d, declared_message, exchange_channel, from_user
+from ..functions.filters import hide_channel, is_class_d_user, is_declared_message, is_long_text, is_nm_text
+from ..functions.filters import new_group, test_group
 from ..functions.group import leave_group
 from ..functions.ids import init_group_id, init_user_id
 from ..functions.receive import receive_add_bad, receive_add_except, receive_clear_data, receive_config_commit
@@ -48,34 +49,44 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
     try:
         # Check
         dispatcher.add_handler(MessageHandler(
-            filters=(Filters.update.messages & Filters.group & ~test_group & from_user & ~Filters.status_update
-                     & ~class_c & ~class_d & ~declared_message),
+            filters=(Filters.update.messages & Filters.group & ~Filters.status_update
+                     & ~test_group & authorized_group
+                     & from_user & ~class_c & ~class_d
+                     & ~declared_message),
             callback=check
         ))
         # Check join
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.group & ~test_group & from_user & Filters.status_update.new_chat_members & ~new_group,
+            filters=(Filters.group & ~test_group & Filters.status_update.new_chat_members
+                     & ~test_group & ~new_group & authorized_group
+                     & from_user & ~class_c & ~class_d
+                     & ~declared_message),
             callback=check_join
         ))
         # Exchange emergency
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.update.channel_post & hide_channel,
+            filters=(Filters.update.channel_post
+                     & hide_channel),
             callback=exchange_emergency
         ))
         # Init group
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.group & ~test_group & from_user & (Filters.status_update.new_chat_members
-                                                               | Filters.status_update.chat_created) & new_group,
+            filters=(Filters.group & (Filters.status_update.new_chat_members | Filters.status_update.chat_created)
+                     & ~test_group & new_group
+                     & from_user),
             callback=init_group
         ))
         # Process data
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.update.channel_post & exchange_channel,
+            filters=(Filters.update.channel_post
+                     & exchange_channel),
             callback=process_data
         ))
         # Test
         dispatcher.add_handler(MessageHandler(
-            filters=Filters.update.messages & Filters.group & test_group & from_user & ~Filters.status_update,
+            filters=(Filters.update.messages & Filters.group & ~Filters.status_update
+                     & test_group
+                     & from_user),
             callback=test
         ))
 
@@ -126,12 +137,12 @@ def check_join(update: Update, context: CallbackContext) -> bool:
             # Basic data
             uid = new.id
 
+            # Check if the user is Class D personnel
+            if is_class_d_user(new):
+                return True
+
             # Work with NOSPAM
             if glovar.nospam_id in glovar.admin_ids[gid]:
-                # Check if the user is Class D personnel
-                if uid in glovar.bad_ids["users"]:
-                    return True
-
                 # Check name
                 name = get_full_name(new, True)
                 if name and is_nm_text(name):
@@ -261,6 +272,7 @@ def process_data(update: Update, context: CallbackContext) -> bool:
         message = update.effective_message
 
         data = receive_text_data(message)
+
         if not data:
             return True
 
@@ -269,6 +281,7 @@ def process_data(update: Update, context: CallbackContext) -> bool:
         action = data["action"]
         action_type = data["type"]
         data = data["data"]
+
         # This will look awkward,
         # seems like it can be simplified,
         # but this is to ensure that the permissions are clear,
@@ -323,7 +336,7 @@ def process_data(update: Update, context: CallbackContext) -> bool:
                     if action_type == "bad":
                         receive_add_bad(sender, data)
                     elif action_type == "except":
-                        receive_add_except(client, data)
+                        receive_add_except(data)
 
                 elif action == "backup":
                     if action_type == "now":
@@ -344,9 +357,9 @@ def process_data(update: Update, context: CallbackContext) -> bool:
 
                 elif action == "remove":
                     if action_type == "bad":
-                        receive_remove_bad(sender, data)
+                        receive_remove_bad(data)
                     elif action_type == "except":
-                        receive_remove_except(client, data)
+                        receive_remove_except(data)
                     elif action_type == "score":
                         receive_remove_score(data)
                     elif action_type == "watch":
@@ -420,12 +433,6 @@ def process_data(update: Update, context: CallbackContext) -> bool:
                     elif action_type == "count":
                         if data == "ask":
                             send_count(client)
-
-            elif sender == "USER":
-
-                if action == "remove":
-                    if action_type == "bad":
-                        receive_remove_bad(sender, data)
 
             elif sender == "WARN":
 
