@@ -51,7 +51,7 @@ class FilterAuthorizedGroup(BaseFilter):
 
 
 class FilterClassC(BaseFilter):
-    # Check if the message is Class C object
+    # Check if the message is sent from Class C personnel
     def filter(self, message: Message):
         try:
             if not message.from_user:
