@@ -267,6 +267,7 @@ def init_group(update: Update, context: CallbackContext) -> bool:
 
 def process_data(update: Update, context: CallbackContext) -> bool:
     # Process the data in exchange channel
+    glovar.locks["receive"].acquire()
     try:
         client = context.bot
         message = update.effective_message
@@ -449,6 +450,8 @@ def process_data(update: Update, context: CallbackContext) -> bool:
         return True
     except Exception as e:
         logger.warning(f"Process data error: {e}", exc_info=True)
+    finally:
+        glovar.locks["receive"].release()
 
     return False
 

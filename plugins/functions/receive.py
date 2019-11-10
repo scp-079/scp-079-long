@@ -37,26 +37,6 @@ from .timers import update_admins
 logger = logging.getLogger(__name__)
 
 
-def receive_add_except(data: dict) -> bool:
-    # Receive a object and add it to except list
-    try:
-        # Basic data
-        the_id = data["id"]
-        the_type = data["type"]
-
-        # Receive except channel
-        if the_type == "channel":
-            glovar.except_ids["channels"].add(the_id)
-
-        save("except_ids")
-
-        return True
-    except Exception as e:
-        logger.warning(f"Receive add except error: {e}", exc_info=True)
-
-    return False
-
-
 def receive_add_bad(sender: str, data: dict) -> bool:
     # Receive bad users or channels that other bots shared
     try:
@@ -77,6 +57,26 @@ def receive_add_bad(sender: str, data: dict) -> bool:
         return True
     except Exception as e:
         logger.warning(f"Receive add bad error: {e}", exc_info=True)
+
+    return False
+
+
+def receive_add_except(data: dict) -> bool:
+    # Receive a object and add it to except list
+    try:
+        # Basic data
+        the_id = data["id"]
+        the_type = data["type"]
+
+        # Receive except channel
+        if the_type == "channel":
+            glovar.except_ids["channels"].add(the_id)
+
+        save("except_ids")
+
+        return True
+    except Exception as e:
+        logger.warning(f"Receive add except error: {e}", exc_info=True)
 
     return False
 
@@ -436,6 +436,7 @@ def receive_remove_except(data: dict) -> bool:
 
 def receive_remove_score(data: int) -> bool:
     # Receive remove user's score
+    glovar.locks["message"].acquire()
     try:
         # Basic data
         uid = data
@@ -449,6 +450,8 @@ def receive_remove_score(data: int) -> bool:
         return True
     except Exception as e:
         logger.warning(f"Receive remove score error: {e}", exc_info=True)
+    finally:
+        glovar.locks["message"].release()
 
     return False
 
@@ -517,6 +520,7 @@ def receive_text_data(message: Message) -> dict:
 
 def receive_user_score(project: str, data: dict) -> bool:
     # Receive and update user's score
+    glovar.locks["message"].acquire()
     try:
         # Basic data
         project = project.lower()
@@ -532,6 +536,8 @@ def receive_user_score(project: str, data: dict) -> bool:
         return True
     except Exception as e:
         logger.warning(f"Receive user score error: {e}", exc_info=True)
+    finally:
+        glovar.locks["message"].release()
 
     return False
 
