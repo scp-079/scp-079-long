@@ -145,7 +145,7 @@ class FilterFromUser(BaseFilter):
     # Check if the message is sent from a user
     def filter(self, message: Message):
         try:
-            if message.from_user:
+            if message.from_user and message.from_user.id != 777000:
                 return True
         except Exception as e:
             logger.warning(f"FilterFromUser error: {e}", exc_info=True)
