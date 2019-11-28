@@ -132,75 +132,72 @@ def update_admins(client: Bot) -> bool:
     try:
         group_list = list(glovar.admin_ids)
         for gid in group_list:
-            try:
-                should_leave = True
-                reason = "permissions"
-                admin_members = get_admins(client, gid)
-                if admin_members and any([admin.user.id == glovar.long_id for admin in admin_members]):
-                    # Get user admins
-                    glovar.admin_ids[gid] = {admin.user.id for admin in admin_members}
+            should_leave = True
+            reason = "permissions"
+            admin_members = get_admins(client, gid)
+            if admin_members and any([admin.user.id == glovar.long_id for admin in admin_members]):
+                # Get user admins
+                glovar.admin_ids[gid] = {admin.user.id for admin in admin_members}
 
-                    # Get bot admins
-                    for bid in glovar.bot_ids:
-                        chat_member = get_chat_member(client, gid, bid)
-                        chat_member and glovar.admin_ids[gid].add(bid)
+                # Get bot admins
+                for bid in glovar.bot_ids:
+                    chat_member = get_chat_member(client, gid, bid)
+                    chat_member and glovar.admin_ids[gid].add(bid)
 
-                    if glovar.user_id not in glovar.admin_ids[gid]:
-                        reason = "user"
-                    else:
-                        for admin in admin_members:
-                            if admin.user.id == glovar.long_id:
-                                if admin.can_delete_messages and admin.can_restrict_members:
-                                    should_leave = False
+                if glovar.user_id not in glovar.admin_ids[gid]:
+                    reason = "user"
+                else:
+                    for admin in admin_members:
+                        if admin.user.id == glovar.long_id:
+                            if admin.can_delete_messages and admin.can_restrict_members:
+                                should_leave = False
 
-                    if should_leave:
-                        group_name, group_link = get_group_info(client, gid)
-                        share_data(
-                            client=client,
-                            receivers=["MANAGE"],
-                            action="leave",
-                            action_type="request",
-                            data={
-                                "group_id": gid,
-                                "group_name": group_name,
-                                "group_link": group_link,
-                                "reason": reason
-                            }
-                        )
-                        reason = lang(f"reason_{reason}")
-                        project_link = general_link(glovar.project_name, glovar.project_link)
-                        debug_text = (f"{lang('project')}{lang('colon')}{project_link}\n"
-                                      f"{lang('group_name')}{lang('colon')}{general_link(group_name, group_link)}\n"
-                                      f"{lang('group_id')}{lang('colon')}{code(gid)}\n"
-                                      f"{lang('status')}{lang('colon')}{code(reason)}\n")
-                        thread(send_message, (client, glovar.debug_channel_id, debug_text))
-                    else:
-                        save("admin_ids")
-                elif (admin_members is False
-                      or any([admin.user.id == glovar.long_id for admin in admin_members]) is False):
-                    # Bot is not in the chat, leave automatically without approve
+                if should_leave:
                     group_name, group_link = get_group_info(client, gid)
-                    leave_group(client, gid)
                     share_data(
                         client=client,
                         receivers=["MANAGE"],
                         action="leave",
-                        action_type="info",
+                        action_type="request",
                         data={
                             "group_id": gid,
                             "group_name": group_name,
-                            "group_link": group_link
+                            "group_link": group_link,
+                            "reason": reason
                         }
                     )
-                    project_text = general_link(glovar.project_name, glovar.project_link)
-                    debug_text = (f"{lang('project')}{lang('colon')}{project_text}\n"
+                    reason = lang(f"reason_{reason}")
+                    project_link = general_link(glovar.project_name, glovar.project_link)
+                    debug_text = (f"{lang('project')}{lang('colon')}{project_link}\n"
                                   f"{lang('group_name')}{lang('colon')}{general_link(group_name, group_link)}\n"
                                   f"{lang('group_id')}{lang('colon')}{code(gid)}\n"
-                                  f"{lang('status')}{lang('colon')}{code(lang('leave_auto'))}\n"
-                                  f"{lang('reason')}{lang('colon')}{code(lang('reason_leave'))}\n")
+                                  f"{lang('status')}{lang('colon')}{code(reason)}\n")
                     thread(send_message, (client, glovar.debug_channel_id, debug_text))
-            except Exception as e:
-                logger.warning(f"Update admin in {gid} error: {e}", exc_info=True)
+                else:
+                    save("admin_ids")
+            elif (admin_members is False
+                  or any([admin.user.id == glovar.long_id for admin in admin_members]) is False):
+                # Bot is not in the chat, leave automatically without approve
+                group_name, group_link = get_group_info(client, gid)
+                leave_group(client, gid)
+                share_data(
+                    client=client,
+                    receivers=["MANAGE"],
+                    action="leave",
+                    action_type="info",
+                    data={
+                        "group_id": gid,
+                        "group_name": group_name,
+                        "group_link": group_link
+                    }
+                )
+                project_text = general_link(glovar.project_name, glovar.project_link)
+                debug_text = (f"{lang('project')}{lang('colon')}{project_text}\n"
+                              f"{lang('group_name')}{lang('colon')}{general_link(group_name, group_link)}\n"
+                              f"{lang('group_id')}{lang('colon')}{code(gid)}\n"
+                              f"{lang('status')}{lang('colon')}{code(lang('leave_auto'))}\n"
+                              f"{lang('reason')}{lang('colon')}{code(lang('reason_leave'))}\n")
+                thread(send_message, (client, glovar.debug_channel_id, debug_text))
 
         return True
     except Exception as e:
