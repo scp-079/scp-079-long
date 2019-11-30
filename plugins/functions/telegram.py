@@ -43,7 +43,7 @@ def delete_message(client: Bot, cid: int, mid: int) -> Optional[bool]:
     return result
 
 
-def download_media(client: Bot, file_id: str, file_path: str):
+def download_media(client: Bot, file_id: str, file_path: str) -> Optional[str]:
     # Download a media file
     result = None
     try:
@@ -60,7 +60,7 @@ def download_media(client: Bot, file_id: str, file_path: str):
     return result
 
 
-def get_admins(client: Bot, cid: int) -> Optional[Union[bool, List[ChatMember]]]:
+def get_admins(client: Bot, cid: int) -> Union[bool, List[ChatMember], None]:
     # Get a group's admins
     result = None
     try:
@@ -85,7 +85,7 @@ def get_chat(client: Bot, cid: Union[int, str]) -> Optional[Chat]:
     return result
 
 
-def get_chat_member(client: Bot, cid: int, uid: int) -> Optional[Union[bool, ChatMember]]:
+def get_chat_member(client: Bot, cid: int, uid: int) -> Union[bool, ChatMember, None]:
     # Get a chat member
     result = None
     try:
@@ -168,7 +168,7 @@ def restrict_chat_member(client: Bot, cid: int, uid: int, permissions: ChatPermi
 
 
 def send_document(client: Bot, cid: int, document: str, caption: str = None, mid: int = None,
-                  markup: InlineKeyboardMarkup = None) -> Optional[Union[bool, Message]]:
+                  markup: InlineKeyboardMarkup = None) -> Union[bool, Message, None]:
     # Send a document to a chat
     result = None
     try:
@@ -191,7 +191,7 @@ def send_document(client: Bot, cid: int, document: str, caption: str = None, mid
 
 
 def send_message(client: Bot, cid: int, text: str, mid: int = None,
-                 markup: InlineKeyboardMarkup = None) -> Optional[Union[bool, Message]]:
+                 markup: InlineKeyboardMarkup = None) -> Union[bool, Message, None]:
     # Send a message to a chat
     result = None
     try:
