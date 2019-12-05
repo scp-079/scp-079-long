@@ -81,7 +81,10 @@ def get_chat(client: Bot, cid: Union[int, str]) -> Optional[Chat]:
     # Get a chat
     result = None
     try:
-        result = client.get_chat(chat_id=cid)
+        try:
+            result = client.get_chat(chat_id=cid)
+        except BadRequest:
+            return None
     except Exception as e:
         logger.warning(f"Get chat {cid} error: {e}", exc_info=True)
 
@@ -146,7 +149,10 @@ def leave_chat(client: Bot, cid: int) -> Optional[bool]:
     # Leave a channel
     result = None
     try:
-        result = client.leave_chat(chat_id=cid)
+        try:
+            result = client.leave_chat(chat_id=cid)
+        except BadRequest:
+            return False
     except Exception as e:
         logger.warning(f"Leave chat {cid} error: {e}", exc_info=True)
 
