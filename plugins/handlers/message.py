@@ -220,12 +220,15 @@ def init_group(update: Update, context: CallbackContext) -> bool:
         client = context.bot
         message = update.effective_message
 
+        # Basic data
         gid = message.chat.id
+        inviter = message.from_user.id
+
+        # Text prefix
         text = get_debug_text(client, message.chat)
-        invited_by = message.from_user.id
 
         # Check permission
-        if invited_by == glovar.user_id:
+        if inviter.id == glovar.user_id:
             # Remove the left status
             if gid in glovar.left_group_ids:
                 glovar.left_group_ids.discard(gid)
@@ -235,6 +238,7 @@ def init_group(update: Update, context: CallbackContext) -> bool:
                 return True
 
             admin_members = get_admins(client, gid)
+
             if admin_members:
                 glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
                                          if not admin.user.is_bot}
@@ -249,13 +253,17 @@ def init_group(update: Update, context: CallbackContext) -> bool:
                 return leave_group(client, gid)
 
             leave_group(client, gid)
+
             text += (f"{lang('status')}{lang('colon')}{code(lang('status_left'))}\n"
                      f"{lang('reason')}{lang('colon')}{code(lang('reason_unauthorized'))}\n")
-            if message.from_user.username:
-                text += f"{lang('inviter')}{lang('colon')}{mention_id(invited_by)}\n"
-            else:
-                text += f"{lang('inviter')}{lang('colon')}{code(invited_by)}\n"
 
+        # Add inviter info
+        if message.from_user.username:
+            text += f"{lang('inviter')}{lang('colon')}{mention_id(inviter.id)}\n"
+        else:
+            text += f"{lang('inviter')}{lang('colon')}{code(inviter.id)}\n"
+
+        # Send debug message
         thread(send_message, (client, glovar.debug_channel_id, text))
 
         return True
@@ -271,6 +279,9 @@ def process_data(update: Update, context: CallbackContext) -> bool:
     try:
         client = context.bot
         message = update.effective_message
+
+        if message.from_user.id != glovar.lang_id and not glovar.aio:
+            return True
 
         data = receive_text_data(message)
 
