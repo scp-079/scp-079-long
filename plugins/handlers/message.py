@@ -241,7 +241,8 @@ def init_group(update: Update, context: CallbackContext) -> bool:
 
             if admin_members:
                 glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
-                                         if not admin.user.is_bot}
+                                         if (not admin.user.is_bot
+                                             or admin.user.id in glovar.bot_ids)}
                 save("admin_ids")
                 text += f"{lang('status')}{lang('colon')}{code(lang('status_joined'))}\n"
             else:
