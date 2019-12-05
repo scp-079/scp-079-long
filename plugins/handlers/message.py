@@ -280,9 +280,6 @@ def process_data(update: Update, context: CallbackContext) -> bool:
         client = context.bot
         message = update.effective_message
 
-        if message.from_user.id != glovar.lang_id and not glovar.aio:
-            return True
-
         data = receive_text_data(message)
 
         if not data:
