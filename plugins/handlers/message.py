@@ -222,7 +222,7 @@ def init_group(update: Update, context: CallbackContext) -> bool:
 
         # Basic data
         gid = message.chat.id
-        inviter = message.from_user.id
+        inviter = message.from_user
 
         # Text prefix
         text = get_debug_text(client, message.chat)
