@@ -144,7 +144,7 @@ def check_join(update: Update, context: CallbackContext) -> bool:
             # Work with NOSPAM
             if glovar.nospam_id in glovar.admin_ids[gid]:
                 # Check name
-                name = get_full_name(new, True)
+                name = get_full_name(new, True, True)
                 if name and is_nm_text(name):
                     return True
 

@@ -4,7 +4,9 @@ This bot is used to auto delete super long messages.
 
 ## How to use
 
-See [this article](https://scp-079.org/long/).
+- See the [manual](https://telegra.ph/SCP-079-LONG-12-04)
+- See [this article](https://scp-079.org/long/) to build a bot by yourself
+- Discuss [group](https://t.me/SCP_079_CHAT)
 
 ## To Do List
 

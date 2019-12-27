@@ -553,17 +553,17 @@ def is_long_text(message: Message) -> int:
         # Work with NOSPAM
         if length <= 10000:
             # Check the forward from name:
-            forward_name = get_forward_name(message, True)
+            forward_name = get_forward_name(message, True, True)
             if is_nm_text(forward_name):
                 return 0
 
             # Check the user's name:
-            name = get_full_name(message.from_user, True)
+            name = get_full_name(message.from_user, True, True)
             if is_nm_text(name):
                 return 0
 
             # Check the text
-            normal_text = get_text(message, True)
+            normal_text = get_text(message, True, True)
             if glovar.nospam_id in glovar.admin_ids[gid]:
                 if is_ban_text(normal_text, False):
                     return 0
