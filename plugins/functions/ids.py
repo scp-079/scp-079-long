@@ -1,5 +1,5 @@
 # SCP-079-LONG - Control super long messages
-# Copyright (C) 2019 SCP-079 <https://scp-079.org>
+# Copyright (C) 2019-2020 SCP-079 <https://scp-079.org>
 #
 # This file is part of SCP-079-LONG.
 #
@@ -29,19 +29,26 @@ logger = logging.getLogger(__name__)
 def init_group_id(gid: int) -> bool:
     # Init group data
     try:
+        if gid == glovar.captcha_group_id:
+            return False
+
         if gid == glovar.test_group_id:
             return False
 
         if gid in glovar.left_group_ids:
             return False
 
-        if glovar.configs.get(gid) is None:
-            glovar.configs[gid] = deepcopy(glovar.default_config)
-            save("configs")
-
         if glovar.admin_ids.get(gid) is None:
             glovar.admin_ids[gid] = set()
             save("admin_ids")
+
+        if glovar.trust_ids.get(gid) is None:
+            glovar.trust_ids[gid] = set()
+            save("trust_ids")
+
+        if glovar.configs.get(gid) is None:
+            glovar.configs[gid] = deepcopy(glovar.default_config)
+            save("configs")
 
         if glovar.declared_message_ids.get(gid) is None:
             glovar.declared_message_ids[gid] = set()

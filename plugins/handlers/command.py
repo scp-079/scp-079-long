@@ -1,5 +1,5 @@
 # SCP-079-LONG - Control super long messages
-# Copyright (C) 2019 SCP-079 <https://scp-079.org>
+# Copyright (C) 2019-2020 SCP-079 <https://scp-079.org>
 #
 # This file is part of SCP-079-LONG.
 #
@@ -28,7 +28,7 @@ from ..functions.channel import get_debug_text, share_data
 from ..functions.etc import bold, code, delay, get_command_context, get_command_type, get_int, get_now, lang
 from ..functions.etc import thread, mention_id
 from ..functions.file import save
-from ..functions.filters import authorized_group, from_user, is_class_c, test_group
+from ..functions.filters import authorized_group, captcha_group, from_user, is_class_c, test_group
 from ..functions.group import get_config_text
 from ..functions.telegram import delete_message, get_group_info, send_message, send_report_message
 
@@ -45,18 +45,20 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
             command=["config"],
             callback=config,
             filters=(Filters.update.messages & Filters.group
-                     & ~test_group & authorized_group
+                     & ~captcha_group & ~test_group & authorized_group
                      & from_user)
         ))
+
         # /config_long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
             command=[f"config_{glovar.sender.lower()}"],
             callback=config_directly,
             filters=(Filters.update.messages & Filters.group
-                     & ~test_group & authorized_group
+                     & ~captcha_group & ~test_group & authorized_group
                      & from_user)
         ))
+
         # /long
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
@@ -65,6 +67,7 @@ def add_command_handlers(dispatcher: Dispatcher) -> bool:
             filters=(Filters.update.messages & Filters.group
                      & from_user)
         ))
+
         # /version
         dispatcher.add_handler(PrefixHandler(
             prefix=glovar.prefix,
@@ -104,6 +107,7 @@ def config(update: Update, context: CallbackContext) -> bool:
 
         # Check command format
         command_type = get_command_type(message)
+
         if not command_type or not re.search(f"^{glovar.sender}$", command_type, re.I):
             return True
 
@@ -182,6 +186,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
 
         # Check command format
         command_type, command_context = get_command_context(message)
+
         if command_type:
             if command_type == "show":
                 text += f"{lang('action')}{lang('colon')}{code(lang('config_show'))}\n"
@@ -208,6 +213,7 @@ def config_directly(update: Update, context: CallbackContext) -> bool:
                                 reason = lang("command_para")
                         elif command_type == "limit":
                             limit = get_int(command_context)
+
                             if 500 <= limit <= 10000 and limit in set(range(500, 10500, 500)):
                                 new_config["limit"] = limit
                             else:
@@ -260,6 +266,7 @@ def long(update: Update, context: CallbackContext) -> bool:
         client = context.bot
         message = update.effective_message
 
+        # Delete the command
         gid = message.chat.id
         mid = message.message_id
         thread(delete_message, (client, gid, mid))

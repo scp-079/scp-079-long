@@ -1,5 +1,5 @@
 # SCP-079-LONG - Control super long messages
-# Copyright (C) 2019 SCP-079 <https://scp-079.org>
+# Copyright (C) 2019-2020 SCP-079 <https://scp-079.org>
 #
 # This file is part of SCP-079-LONG.
 #
@@ -66,6 +66,7 @@ user_id: int = 0
 warn_id: int = 0
 
 # [channels]
+captcha_group_id: int = 0
 critical_channel_id: int = 0
 debug_channel_id: int = 0
 exchange_channel_id: int = 0
@@ -102,14 +103,17 @@ password: str = ""
 try:
     config = RawConfigParser()
     config.read("config.ini")
+
     # [proxy]
     enabled = config["proxy"].get("enabled", enabled)
     enabled = eval(enabled)
     hostname = config["proxy"].get("hostname", hostname)
     port = config["proxy"].get("port", port)
+
     # [basic]
     bot_token = config["basic"].get("bot_token", bot_token)
     prefix = list(config["basic"].get("prefix", prefix_str))
+
     # [bots]
     avatar_id = int(config["bots"].get("avatar_id", avatar_id))
     captcha_id = int(config["bots"].get("captcha_id", captcha_id))
@@ -123,13 +127,16 @@ try:
     tip_id = int(config["bots"].get("tip_id", tip_id))
     user_id = int(config["bots"].get("user_id", user_id))
     warn_id = int(config["bots"].get("warn_id", warn_id))
+
     # [channels]
+    captcha_group_id = int(config["channels"].get("captcha_group_id", captcha_group_id))
     critical_channel_id = int(config["channels"].get("critical_channel_id", critical_channel_id))
     debug_channel_id = int(config["channels"].get("debug_channel_id", debug_channel_id))
     exchange_channel_id = int(config["channels"].get("exchange_channel_id", exchange_channel_id))
     hide_channel_id = int(config["channels"].get("hide_channel_id", hide_channel_id))
     logging_channel_id = int(config["channels"].get("logging_channel_id", logging_channel_id))
     test_group_id = int(config["channels"].get("test_group_id", test_group_id))
+
     # [custom]
     backup = config["custom"].get("backup", backup)
     backup = eval(backup)
@@ -145,6 +152,7 @@ try:
     time_track = int(config["custom"].get("time_track", time_track))
     zh_cn = config["custom"].get("zh_cn", zh_cn)
     zh_cn = eval(zh_cn)
+
     # [emoji]
     emoji_ad_single = int(config["emoji"].get("emoji_ad_single", emoji_ad_single))
     emoji_ad_total = int(config["emoji"].get("emoji_ad_total", emoji_ad_total))
@@ -152,6 +160,7 @@ try:
     emoji_protect = getdecoder("unicode_escape")(config["emoji"].get("emoji_protect", emoji_protect))[0]
     emoji_wb_single = int(config["emoji"].get("emoji_wb_single", emoji_wb_single))
     emoji_wb_total = int(config["emoji"].get("emoji_wb_total", emoji_wb_total))
+
     # [encrypt]
     key = config["encrypt"].get("key", key)
     key = key.encode("utf-8")
@@ -177,6 +186,7 @@ if (enabled not in {False, True}
         or tip_id == 0
         or user_id == 0
         or warn_id == 0
+        or captcha_group_id == 0
         or critical_channel_id == 0
         or debug_channel_id == 0
         or exchange_channel_id == 0
@@ -417,7 +427,7 @@ sender: str = "LONG"
 
 should_hide: bool = False
 
-version: str = "0.1.2"
+version: str = "0.1.3"
 
 # Load data from pickle
 
@@ -452,6 +462,11 @@ except_ids: Dict[str, Set[int]] = {
 }
 # except_ids = {
 #     "channels": {-10012345678}
+# }
+
+trust_ids: Dict[int, Set[int]] = {}
+# trust_ids = {
+#     -10012345678: {12345678}
 # }
 
 user_ids: Dict[int, Dict[str, Dict[Union[int, str], Union[float, int]]]] = {}
@@ -513,8 +528,10 @@ for word_type in regex:
 # }
 
 # Load data
-file_list: List[str] = ["admin_ids", "bad_ids", "except_ids", "user_ids", "watch_ids", "configs"]
+file_list: List[str] = ["admin_ids", "bad_ids", "except_ids", "trust_ids", "user_ids", "watch_ids",
+                        "configs"]
 file_list += [f"{f}_words" for f in regex]
+
 for file in file_list:
     try:
         try:
@@ -526,6 +543,7 @@ for file in file_list:
                     pickle.dump(eval(f"{file}"), f)
         except Exception as e:
             logger.error(f"Load data {file} error: {e}", exc_info=True)
+
             with open(f"data/.{file}", "rb") as f:
                 locals()[f"{file}"] = pickle.load(f)
     except Exception as e:
@@ -535,6 +553,7 @@ for file in file_list:
 # Generate special characters dictionary
 for special in ["spc", "spe"]:
     locals()[f"{special}_dict"]: Dict[str, str] = {}
+
     for rule in locals()[f"{special}_words"]:
         # Check keys
         if "[" not in rule:
@@ -546,10 +565,11 @@ for special in ["spc", "spe"]:
 
         keys = rule.split("]")[0][1:]
         value = rule.split("?#")[1][1]
+
         for k in keys:
             locals()[f"{special}_dict"][k] = value
 
 # Start program
-copyright_text = (f"SCP-079-{sender} v{version}, Copyright (C) 2019 SCP-079 <https://scp-079.org>\n"
+copyright_text = (f"SCP-079-{sender} v{version}, Copyright (C) 2019-2020 SCP-079 <https://scp-079.org>\n"
                   "Licensed under the terms of the GNU General Public License v3 or later (GPLv3+)\n")
 print(copyright_text)

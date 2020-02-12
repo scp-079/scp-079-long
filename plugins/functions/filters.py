@@ -1,5 +1,5 @@
 # SCP-079-LONG - Control super long messages
-# Copyright (C) 2019 SCP-079 <https://scp-079.org>
+# Copyright (C) 2019-2020 SCP-079 <https://scp-079.org>
 #
 # This file is part of SCP-079-LONG.
 #
@@ -42,10 +42,28 @@ class FilterAuthorizedGroup(BaseFilter):
                 return False
 
             cid = message.chat.id
+
             if init_group_id(cid):
                 return True
         except Exception as e:
             logger.warning(f"FilterAuthorizedGroup error: {e}", exc_info=True)
+
+        return False
+
+
+class FilterCaptchaGroup(BaseFilter):
+    # Check if the message is sent from the captcha group
+    def filter(self, message: Message):
+        try:
+            if not message.chat:
+                return False
+
+            cid = message.chat.id
+
+            if cid == glovar.captcha_group_id:
+                return True
+        except Exception as e:
+            logger.warning(f"FilterCaptchaGroup error: {e}", exc_info=True)
 
         return False
 
@@ -80,11 +98,13 @@ class FilterClassD(BaseFilter):
 
             if message.forward_from:
                 fid = message.forward_from.id
+
                 if fid in glovar.bad_ids["users"]:
                     return True
 
             if message.forward_from_chat:
                 cid = message.forward_from_chat.id
+
                 if cid in glovar.bad_ids["channels"]:
                     return True
         except Exception as e:
@@ -99,6 +119,7 @@ class FilterClassE(BaseFilter):
         try:
             if message.forward_from_chat:
                 cid = message.forward_from_chat.id
+
                 if cid in glovar.except_ids["channels"]:
                     return True
         except Exception as e:
@@ -116,6 +137,7 @@ class FilterDeclaredMessage(BaseFilter):
 
             gid = message.chat.id
             mid = message.message_id
+
             return is_declared_message_id(gid, mid)
         except Exception as e:
             logger.warning(f"FilterDeclaredMessage error: {e}", exc_info=True)
@@ -131,6 +153,7 @@ class FilterExchangeChannel(BaseFilter):
                 return False
 
             cid = message.chat.id
+
             if glovar.should_hide:
                 return cid == glovar.hide_channel_id
             else:
@@ -161,6 +184,7 @@ class FilterHideChannel(BaseFilter):
                 return False
 
             cid = message.chat.id
+
             if cid == glovar.hide_channel_id:
                 return True
         except Exception as e:
@@ -174,6 +198,7 @@ class FilterNewGroup(BaseFilter):
     def filter(self, message: Message):
         try:
             new_users = message.new_chat_members
+
             if new_users:
                 return any(user.id == glovar.long_id for user in new_users)
             elif message.group_chat_created or message.supergroup_chat_created:
@@ -192,6 +217,7 @@ class FilterTestGroup(BaseFilter):
                 return False
 
             cid = message.chat.id
+
             if cid == glovar.test_group_id:
                 return True
         except Exception as e:
@@ -201,6 +227,8 @@ class FilterTestGroup(BaseFilter):
 
 
 authorized_group = FilterAuthorizedGroup()
+
+captcha_group = FilterCaptchaGroup()
 
 class_c = FilterClassC()
 
@@ -303,11 +331,13 @@ def is_class_d(_, message: Message) -> bool:
 
         if message.forward_from:
             fid = message.forward_from.id
+
             if fid in glovar.bad_ids["users"]:
                 return True
 
         if message.forward_from_chat:
             cid = message.forward_from_chat.id
+
             if cid in glovar.bad_ids["channels"]:
                 return True
     except Exception as e:
@@ -343,9 +373,10 @@ def is_class_e_user(user: Union[int, User]) -> bool:
         if uid in glovar.bot_ids:
             return True
 
-        group_list = list(glovar.admin_ids)
+        group_list = list(glovar.trust_ids)
+
         for gid in group_list:
-            if uid in glovar.admin_ids.get(gid, set()):
+            if uid in glovar.trust_ids.get(gid, set()):
                 return True
     except Exception as e:
         logger.warning(f"Is class e user error: {e}", exc_info=True)
@@ -374,6 +405,7 @@ def is_declared_message(message: Message) -> bool:
 
         gid = message.chat.id
         mid = message.message_id
+
         return is_declared_message_id(gid, mid)
     except Exception as e:
         logger.warning(f"Is declared message error: {e}", exc_info=True)
@@ -401,6 +433,7 @@ def is_detected_user(message: Message) -> bool:
         gid = message.chat.id
         uid = message.from_user.id
         now = get_int(message.date.strftime("%s")) or get_now()
+
         return is_detected_user_id(gid, uid, now)
     except Exception as e:
         logger.warning(f"Is detected user error: {e}", exc_info=True)
@@ -417,6 +450,7 @@ def is_detected_user_id(gid: int, uid: int, now: int) -> bool:
             return False
 
         status = user_status["detected"].get(gid, 0)
+
         if now - status < glovar.time_punish:
             return True
     except Exception as e:
@@ -481,6 +515,7 @@ def is_high_score_user(user: User) -> float:
             return 0.0
 
         score = sum(user_status["score"].values())
+
         if score >= 3.0:
             return score
     except Exception as e:
@@ -511,6 +546,7 @@ def is_limited_user(gid: int, user: User, now: int, short: bool = True) -> bool:
             return True
 
         join = glovar.user_ids[uid]["join"].get(gid, 0)
+
         if short and now - join < glovar.time_short:
             return True
 
@@ -536,6 +572,7 @@ def is_long_text(message: Message) -> int:
 
         # Get text
         text = get_text(message)
+
         if not text.strip():
             return 0
 
@@ -554,16 +591,19 @@ def is_long_text(message: Message) -> int:
         if length <= 10000:
             # Check the forward from name:
             forward_name = get_forward_name(message, True, True)
+
             if is_nm_text(forward_name):
                 return 0
 
             # Check the user's name:
             name = get_full_name(message.from_user, True, True)
+
             if is_nm_text(name):
                 return 0
 
             # Check the text
             normal_text = get_text(message, True, True)
+
             if glovar.nospam_id in glovar.admin_ids[gid]:
                 if is_ban_text(normal_text, False):
                     return 0
@@ -597,11 +637,13 @@ def is_new_user(user: User, now: int, gid: int = 0, joined: bool = False) -> boo
 
         if gid:
             join = glovar.user_ids[uid]["join"].get(gid, 0)
+
             if now - join < glovar.time_new:
                 return True
         else:
             for gid in list(glovar.user_ids[uid]["join"]):
                 join = glovar.user_ids[uid]["join"].get(gid, 0)
+
                 if now - join < glovar.time_new:
                     return True
     except Exception as e:
@@ -670,6 +712,7 @@ def is_watch_user(user: User, the_type: str, now: int) -> bool:
 
         uid = user.id
         until = glovar.watch_ids[the_type].get(uid, 0)
+
         if now < until:
             return True
     except Exception as e:

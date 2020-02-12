@@ -1,5 +1,5 @@
 # SCP-079-LONG - Control super long messages
-# Copyright (C) 2019 SCP-079 <https://scp-079.org>
+# Copyright (C) 2019-2020 SCP-079 <https://scp-079.org>
 #
 # This file is part of SCP-079-LONG.
 #
@@ -109,6 +109,7 @@ def send_count(client: Bot) -> bool:
         for word_type in glovar.regex:
             share_regex_count(client, word_type)
             word_list = list(eval(f"glovar.{word_type}_words"))
+
             for word in word_list:
                 eval(f"glovar.{word_type}_words")[word] = 0
 
@@ -128,50 +129,60 @@ def update_admins(client: Bot) -> bool:
     glovar.locks["admin"].acquire()
     try:
         group_list = list(glovar.admin_ids)
+
         for gid in group_list:
             should_leave = True
             reason = "permissions"
             admin_members = get_admins(client, gid)
+
             if admin_members and any([admin.user.id == glovar.long_id for admin in admin_members]):
-                # Get user admins
-                glovar.admin_ids[gid] = {admin.user.id for admin in admin_members}
+                # Admin list
+                glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
+                                         if (admin.can_delete_messages
+                                             and admin.can_restrict_members)}
+                save("admin_ids")
+
+                # Trust list
+                glovar.trust_ids[gid] = {admin.user.id for admin in admin_members}
+                save("trust_ids")
 
                 # Get bot admins
-                for bid in glovar.bot_ids:
-                    chat_member = get_chat_member(client, gid, bid)
-                    chat_member and glovar.admin_ids[gid].add(bid)
+                chat_member = get_chat_member(client, gid, glovar.nospam_id)
+                chat_member and glovar.admin_ids[gid].add(glovar.nospam_id)
+                save("admin_ids")
 
                 if glovar.user_id not in glovar.admin_ids[gid]:
                     reason = "user"
                 else:
                     for admin in admin_members:
-                        if admin.user.id == glovar.long_id:
-                            if admin.can_delete_messages and admin.can_restrict_members:
-                                should_leave = False
+                        if (admin.user.id == glovar.long_id
+                                and admin.can_delete_messages
+                                and admin.can_restrict_members):
+                            should_leave = False
 
-                if should_leave:
-                    group_name, group_link = get_group_info(client, gid)
-                    share_data(
-                        client=client,
-                        receivers=["MANAGE"],
-                        action="leave",
-                        action_type="request",
-                        data={
-                            "group_id": gid,
-                            "group_name": group_name,
-                            "group_link": group_link,
-                            "reason": reason
-                        }
-                    )
-                    reason = lang(f"reason_{reason}")
-                    project_link = general_link(glovar.project_name, glovar.project_link)
-                    debug_text = (f"{lang('project')}{lang('colon')}{project_link}\n"
-                                  f"{lang('group_name')}{lang('colon')}{general_link(group_name, group_link)}\n"
-                                  f"{lang('group_id')}{lang('colon')}{code(gid)}\n"
-                                  f"{lang('status')}{lang('colon')}{code(reason)}\n")
-                    thread(send_message, (client, glovar.debug_channel_id, debug_text))
-                else:
-                    save("admin_ids")
+                if not should_leave:
+                    continue
+
+                group_name, group_link = get_group_info(client, gid)
+                share_data(
+                    client=client,
+                    receivers=["MANAGE"],
+                    action="leave",
+                    action_type="request",
+                    data={
+                        "group_id": gid,
+                        "group_name": group_name,
+                        "group_link": group_link,
+                        "reason": reason
+                    }
+                )
+                reason = lang(f"reason_{reason}")
+                project_link = general_link(glovar.project_name, glovar.project_link)
+                debug_text = (f"{lang('project')}{lang('colon')}{project_link}\n"
+                              f"{lang('group_name')}{lang('colon')}{general_link(group_name, group_link)}\n"
+                              f"{lang('group_id')}{lang('colon')}{code(gid)}\n"
+                              f"{lang('status')}{lang('colon')}{code(reason)}\n")
+                thread(send_message, (client, glovar.debug_channel_id, debug_text))
             elif (admin_members is False
                   or any([admin.user.id == glovar.long_id for admin in admin_members]) is False):
                 # Bot is not in the chat, leave automatically without approve

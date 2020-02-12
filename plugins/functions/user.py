@@ -1,5 +1,5 @@
 # SCP-079-LONG - Control super long messages
-# Copyright (C) 2019 SCP-079 <https://scp-079.org>
+# Copyright (C) 2019-2020 SCP-079 <https://scp-079.org>
 #
 # This file is part of SCP-079-LONG.
 #
@@ -116,7 +116,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
         full_name = get_full_name(message.from_user, True, True)
         forward_name = get_forward_name(message, True, True)
 
-        if is_wb_text(full_name, False) or is_wb_text(forward_name, False):
+        if (is_wb_text(full_name, False) or is_wb_text(forward_name, False)) and length != 79:
             result = forward_evidence(
                 client=client,
                 message=message,
@@ -124,6 +124,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 rule=lang("name_examine"),
                 length=length
             )
+
             if result:
                 add_bad_user(client, uid)
                 ban_user(client, gid, uid)
@@ -138,7 +139,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                     mid=mid,
                     em=result
                 )
-        elif is_watch_user(message.from_user, "ban", now):
+        elif is_watch_user(message.from_user, "ban", now) and length != 79:
             result = forward_evidence(
                 client=client,
                 message=message,
@@ -146,6 +147,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 rule=lang("watch_user"),
                 length=length
             )
+
             if result:
                 add_bad_user(client, uid)
                 ban_user(client, gid, uid)
@@ -160,7 +162,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                     mid=mid,
                     em=result
                 )
-        elif is_high_score_user(message.from_user):
+        elif is_high_score_user(message.from_user) and length != 79:
             score = is_high_score_user(message.from_user)
             result = forward_evidence(
                 client=client,
@@ -170,6 +172,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 length=length,
                 score=score
             )
+
             if result:
                 add_bad_user(client, uid)
                 ban_user(client, gid, uid)
@@ -184,7 +187,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                     mid=mid,
                     em=result
                 )
-        elif is_watch_user(message.from_user, "delete", now):
+        elif is_watch_user(message.from_user, "delete", now) and length != 79:
             result = forward_evidence(
                 client=client,
                 message=message,
@@ -192,6 +195,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 rule=lang("watch_user"),
                 length=length
             )
+
             if result:
                 add_watch_user(client, "ban", uid, now)
                 delete_message(client, gid, mid)
@@ -216,6 +220,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 rule=lang("op_upgrade"),
                 length=length
             )
+
             if result:
                 add_watch_user(client, "ban", uid, now)
                 delete_message(client, gid, mid)
@@ -243,6 +248,7 @@ def terminate_user(client: Bot, message: Message, length: int) -> bool:
                 rule=lang("rule_custom"),
                 length=length
             )
+
             if result:
                 glovar.recorded_ids[gid].add(uid)
                 delete_message(client, gid, mid)

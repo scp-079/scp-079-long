@@ -1,5 +1,5 @@
 # SCP-079-LONG - Control super long messages
-# Copyright (C) 2019 SCP-079 <https://scp-079.org>
+# Copyright (C) 2019-2020 SCP-079 <https://scp-079.org>
 #
 # This file is part of SCP-079-LONG.
 #
@@ -23,10 +23,10 @@ from telegram.ext import CallbackContext, Dispatcher, Filters, MessageHandler
 
 from .. import glovar
 from ..functions.channel import get_debug_text
-from ..functions.etc import code, general_link, get_full_name, get_now, lang, thread, mention_id
+from ..functions.etc import code, general_link, get_full_name, get_now, get_text, lang, thread, mention_id
 from ..functions.file import save
-from ..functions.filters import authorized_group, class_c, class_d, declared_message, exchange_channel, from_user
-from ..functions.filters import hide_channel, is_class_d_user, is_declared_message, is_long_text, is_nm_text
+from ..functions.filters import authorized_group, captcha_group, class_c, class_d, declared_message, exchange_channel
+from ..functions.filters import from_user, hide_channel, is_class_d_user, is_declared_message, is_long_text, is_nm_text
 from ..functions.filters import new_group, test_group
 from ..functions.group import leave_group
 from ..functions.ids import init_group_id, init_user_id
@@ -35,7 +35,7 @@ from ..functions.receive import receive_config_reply, receive_config_show, recei
 from ..functions.receive import receive_leave_approve, receive_refresh, receive_regex, receive_remove_bad
 from ..functions.receive import receive_remove_except, receive_remove_score, receive_remove_watch, receive_rollback
 from ..functions.receive import receive_text_data, receive_user_score, receive_watch_user
-from ..functions.telegram import get_admins, send_message
+from ..functions.telegram import delete_message, get_admins, get_chat_member, send_message
 from ..functions.tests import long_test
 from ..functions.timers import backup_files, send_count
 from ..functions.user import terminate_user
@@ -47,41 +47,54 @@ logger = logging.getLogger(__name__)
 def add_message_handlers(dispatcher: Dispatcher) -> bool:
     # Add message handlers
     try:
+        # CAPTCHA group
+        dispatcher.add_handler(MessageHandler(
+            filters=(Filters.update.messages & Filters.group & ~Filters.status_update
+                     & captcha_group
+                     & from_user),
+            callback=captcha
+        ))
+
         # Check
         dispatcher.add_handler(MessageHandler(
             filters=(Filters.update.messages & Filters.group & ~Filters.status_update
-                     & ~test_group & authorized_group
+                     & ~captcha_group & ~test_group & authorized_group
                      & from_user & ~class_c & ~class_d
                      & ~declared_message),
             callback=check
         ))
+
         # Check join
         dispatcher.add_handler(MessageHandler(
             filters=(Filters.group & ~test_group & Filters.status_update.new_chat_members
-                     & ~test_group & ~new_group & authorized_group
+                     & ~captcha_group & ~test_group & ~new_group & authorized_group
                      & from_user & ~class_c & ~class_d
                      & ~declared_message),
             callback=check_join
         ))
+
         # Exchange emergency
         dispatcher.add_handler(MessageHandler(
             filters=(Filters.update.channel_post
                      & hide_channel),
             callback=exchange_emergency
         ))
+
         # Init group
         dispatcher.add_handler(MessageHandler(
             filters=(Filters.group & (Filters.status_update.new_chat_members | Filters.status_update.chat_created)
-                     & ~test_group & new_group
+                     & ~captcha_group & ~test_group & new_group
                      & from_user),
             callback=init_group
         ))
+
         # Process data
         dispatcher.add_handler(MessageHandler(
             filters=(Filters.update.channel_post
                      & exchange_channel),
             callback=process_data
         ))
+
         # Test
         dispatcher.add_handler(MessageHandler(
             filters=(Filters.update.messages & Filters.group & ~Filters.status_update
@@ -93,6 +106,39 @@ def add_message_handlers(dispatcher: Dispatcher) -> bool:
         return True
     except Exception as e:
         logger.warning(f"Add message handlers error: {e}", exc_info=True)
+
+    return False
+
+
+def captcha(update: Update, context: CallbackContext) -> bool:
+    # Check the messages sent from CAPTCHA group
+    try:
+        client = context.bot
+        message = update.effective_message
+
+        # Basic data
+        gid = message.chat.id
+        mid = message.message_id
+
+        # Get text
+        text = get_text(message)
+
+        if not text.strip():
+            return True
+
+        # Get length
+        length = len(text.encode())
+
+        # Check length
+        if length < 10000:
+            return True
+
+        # Delete the message
+        thread(delete_message, (client, gid, mid))
+
+        return True
+    except Exception as e:
+        logger.warning(f"Captcha error: {e}", exc_info=True)
 
     return False
 
@@ -110,6 +156,7 @@ def check(update: Update, context: CallbackContext) -> bool:
 
         # Super long message
         detection = is_long_text(message)
+
         if detection:
             return terminate_user(client, message, detection)
 
@@ -145,6 +192,7 @@ def check_join(update: Update, context: CallbackContext) -> bool:
             if glovar.nospam_id in glovar.admin_ids[gid]:
                 # Check name
                 name = get_full_name(new, True, True)
+
                 if name and is_nm_text(name):
                     return True
 
@@ -177,6 +225,7 @@ def exchange_emergency(update: Update, context: CallbackContext) -> bool:
 
         # Read basic information
         data = receive_text_data(message)
+
         if not data:
             return True
 
@@ -240,10 +289,22 @@ def init_group(update: Update, context: CallbackContext) -> bool:
             admin_members = get_admins(client, gid)
 
             if admin_members:
+                # Admin list
                 glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
-                                         if (not admin.user.is_bot
-                                             or admin.user.id in glovar.bot_ids)}
+                                         if (admin.can_delete_messages
+                                             and admin.can_restrict_members)}
                 save("admin_ids")
+
+                # Trust list
+                glovar.trust_ids[gid] = {admin.user.id for admin in admin_members}
+                save("trust_ids")
+
+                # Get bot admins
+                chat_member = get_chat_member(client, gid, glovar.nospam_id)
+                chat_member and glovar.admin_ids[gid].add(glovar.nospam_id)
+                save("admin_ids")
+
+                # Text
                 text += f"{lang('status')}{lang('colon')}{code(lang('status_joined'))}\n"
             else:
                 thread(leave_group, (client, gid))
