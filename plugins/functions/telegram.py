@@ -51,10 +51,12 @@ def download_media(client: Bot, file_id: str, file_path: str) -> Optional[str]:
     result = None
     try:
         file = client.get_file(file_id=file_id)
+
         if not file:
             return None
 
         downloaded = file.download(custom_path=file_path)
+
         if downloaded:
             result = file_path
     except Exception as e:
@@ -112,6 +114,7 @@ def get_group_info(client: Bot, chat: Union[int, Chat], cache: bool = True) -> (
     try:
         if isinstance(chat, int):
             the_cache = glovar.chats.get(chat)
+
             if the_cache:
                 result = get_chat(client, chat)
 
