@@ -138,8 +138,9 @@ def update_admins(client: Bot) -> bool:
             if admin_members and any([admin.user.id == glovar.long_id for admin in admin_members]):
                 # Admin list
                 glovar.admin_ids[gid] = {admin.user.id for admin in admin_members
-                                         if (admin.can_delete_messages
-                                             and admin.can_restrict_members)}
+                                         if ((admin.can_delete_messages
+                                              and admin.can_restrict_members)
+                                             or admin.status == "creator")}
                 save("admin_ids")
 
                 # Trust list
