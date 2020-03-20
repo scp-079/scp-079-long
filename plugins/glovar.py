@@ -358,7 +358,7 @@ default_config: Dict[str, Union[bool, int]] = {
     "lock": 0,
     "delete": True,
     "restrict": False,
-    "limit": 6000
+    "limit": 9000
 }
 
 default_user_status: Dict[str, Dict[Union[int, str], Union[float, int]]] = {
