@@ -19,14 +19,15 @@
 import logging
 import re
 from copy import deepcopy
+from subprocess import run, PIPE
 
 from telegram import Update
 from telegram.ext import CallbackContext, Dispatcher, Filters, PrefixHandler
 
 from .. import glovar
 from ..functions.channel import get_debug_text, share_data
-from ..functions.etc import bold, code, delay, get_command_context, get_command_type, get_int, get_now, lang
-from ..functions.etc import thread, mention_id
+from ..functions.etc import code, delay, general_link, get_command_context, get_command_type, get_int, get_now
+from ..functions.etc import get_readable_time, lang, thread, mention_id
 from ..functions.file import save
 from ..functions.filters import authorized_group, captcha_group, from_user, is_class_c, test_group
 from ..functions.group import get_config_text
@@ -280,6 +281,8 @@ def long(update: Update, context: CallbackContext) -> bool:
 
 def version(update: Update, context: CallbackContext) -> bool:
     # Check the program's version
+    result = False
+
     try:
         client = context.bot
         message = update.edited_message or update.message
@@ -289,15 +292,33 @@ def version(update: Update, context: CallbackContext) -> bool:
         aid = message.from_user.id
         mid = message.message_id
 
+        # Get command type
+        command_type = get_command_type(message)
+
+        # Check the command type
+        if command_type and command_type.upper() != glovar.sender:
+            return False
+
+        # Version info
+        git_change = bool(run("git diff-index HEAD --", stdout=PIPE, shell=True).stdout.decode().strip())
+        git_date = run("git log -1 --format='%at'", stdout=PIPE, shell=True).stdout.decode()
+        git_date = get_readable_time(get_int(git_date), "%Y/%m/%d %H:%M:%S")
+        git_hash = run("git rev-parse --short HEAD", stdout=PIPE, shell=True).stdout.decode()
+        get_hash_link = f"https://github.com/scp-079/scp-079-{glovar.sender.lower()}/commit/{git_hash}"
+        command_date = get_readable_time(message.date, "%Y/%m/%d %H:%M:%S")
+
         # Generate the text
         text = (f"{lang('admin')}{lang('colon')}{mention_id(aid)}\n\n"
-                f"{lang('version')}{lang('colon')}{bold(glovar.version)}\n")
+                f"{lang('project')}{lang('colon')}{code(glovar.sender)}\n"
+                f"{lang('version')}{lang('colon')}{code(glovar.version)}\n"
+                f"{lang('本地修改')}{lang('colon')}{code(git_change)}\n"
+                f"{lang('哈希值')}{lang('colon')}{general_link(git_hash, get_hash_link)}\n"
+                f"{lang('提交时间')}{lang('colon')}{code(git_date)}\n"
+                f"{lang('命令发送时间')}{lang('colon')}{code(command_date)}\n")
 
         # Send the report message
-        thread(send_message, (client, cid, text, mid))
-
-        return True
+        result = send_message(client, cid, text, mid)
     except Exception as e:
         logger.warning(f"Version error: {e}", exc_info=True)
 
-    return False
+    return result
