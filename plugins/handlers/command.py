@@ -305,7 +305,7 @@ def version(update: Update, context: CallbackContext) -> bool:
         git_date = get_readable_time(get_int(git_date), "%Y/%m/%d %H:%M:%S")
         git_hash = run("git rev-parse --short HEAD", stdout=PIPE, shell=True).stdout.decode()
         get_hash_link = f"https://github.com/scp-079/scp-079-{glovar.sender.lower()}/commit/{git_hash}"
-        command_date = get_readable_time(message.date, "%Y/%m/%d %H:%M:%S")
+        command_date = get_readable_time(int(message.date.strftime("%s")), "%Y/%m/%d %H:%M:%S")
 
         # Generate the text
         text = (f"{lang('admin')}{lang('colon')}{mention_id(aid)}\n\n"
