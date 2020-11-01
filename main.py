@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+from random import randint
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from telegram.ext import Updater
@@ -52,7 +53,7 @@ update_status(updater.bot, "online")
 # Timer
 scheduler = BackgroundScheduler(job_defaults={"misfire_grace_time": 60})
 scheduler.add_job(interval_min_10, "interval", minutes=10)
-scheduler.add_job(update_status, "cron", [updater.bot, "awake"], minute=30)
+scheduler.add_job(update_status, "cron", [updater.bot, "awake"], minute=randint(30, 34), second=randint(0, 59))
 scheduler.add_job(backup_files, "cron", [updater.bot], hour=20)
 scheduler.add_job(send_count, "cron", [updater.bot], hour=21)
 scheduler.add_job(reset_data, "cron", [updater.bot], day=glovar.date_reset, hour=22)
