@@ -128,10 +128,14 @@ def format_data(sender: str, receivers: List[str], action: str, action_type: str
 
 
 def forward_evidence(client: Bot, message: Message, level: str, rule: str, length: int, score: float = 0.0,
-                     more: str = None) -> Optional[Union[bool, Message]]:
+                     more: str = None, general: bool = True) -> Optional[Union[bool, Message]]:
     # Forward the message to the logging channel as evidence
     result = None
+
     try:
+        # Get channel id
+        channel_id = glovar.logging_channel_id if general else glovar.long_channel_id
+
         # Basic information
         uid = message.from_user.id
         text = (f"{lang('project')}{lang('colon')}{code(glovar.sender)}\n"
@@ -178,12 +182,12 @@ def forward_evidence(client: Bot, message: Message, level: str, rule: str, lengt
                 or message.video_note
                 or message.voice
                 or message.game):
-            result = send_message(client, glovar.logging_channel_id, text)
+            result = send_message(client, channel_id, text)
             return result
 
         try:
             result = message.forward(
-                chat_id=glovar.logging_channel_id,
+                chat_id=channel_id,
                 disable_notification=True
             )
         except Exception as e:
@@ -191,7 +195,7 @@ def forward_evidence(client: Bot, message: Message, level: str, rule: str, lengt
             return False
 
         result = result.message_id
-        result = send_message(client, glovar.logging_channel_id, text, result)
+        result = send_message(client, channel_id, text, result)
     except Exception as e:
         logger.warning(f"Forward evidence error: {e}", exc_info=True)
 
