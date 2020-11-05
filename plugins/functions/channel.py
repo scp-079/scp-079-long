@@ -136,6 +136,9 @@ def forward_evidence(client: Bot, message: Message, level: str, rule: str, lengt
         # Get channel id
         channel_id = glovar.logging_channel_id if general else glovar.long_channel_id
 
+        if not glovar.long_channel_id:
+            channel_id = glovar.logging_channel_id
+
         # Basic information
         uid = message.from_user.id
         text = (f"{lang('project')}{lang('colon')}{code(glovar.sender)}\n"
